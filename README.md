@@ -2,11 +2,9 @@
 
 * Marco Colognese
     - VR423791
-    - id894jvf
 
 * Mattia Rossini
     - VR423614
-    - id594wuv
 
 
 
