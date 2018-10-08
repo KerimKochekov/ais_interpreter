@@ -1,0 +1,444 @@
+\documentclass[a4paper, 10pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{textcomp}
+\usepackage{graphicx, amsmath, amssymb, listings, eurosym}
+\usepackage{frontespizio}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{hidelinks,
+	colorlinks = false,
+	urlcolor = black,
+	linkcolor = black}
+\usepackage{stmaryrd}
+\usepackage[margin=3cm]{geometry}
+\usepackage{color}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,trees,calc}
+\lstset{
+	mathescape
+}
+
+\begin{document}
+
+\begin{frontespizio}
+	\Universita {Verona}
+	\Dipartimento {Informatica}
+	\Corso [Laurea Magistrale]{Ingegneria e Scienze Informatiche}
+	\Annoaccademico {2017/2018}
+	\Titoletto {}
+	\Titolo {\textbf{\underline{Analisi dei Sistemi Informatici}}\\\textnormal{Dominio Astratto degli Intervalli}}
+	\Sottotitolo {}
+	\Candidato{Marco Colognese VR423791\\Mattia Rossini VR423614}
+	\NCandidato{Autori}
+\end{frontespizio}
+
+
+\tableofcontents
+
+
+\chapter*{Introduzione}
+\addcontentsline{toc}{chapter}{Introduzione}
+Lo scopo principale di questo progetto è quello di fornire un'implementazione di una libreria basata sul \textit{dominio astratto degli intervalli}, scritta nel linguaggio \textit{C++}. Essa permette di effettuare l'analisi statica di un qualsiasi programma, sfruttando le proprietà e le operazioni di tale dominio.\\
+\\
+La motivazione principale che ci ha portato allo sviluppo del seguente progetto è l'interesse per l'approfondimento dell'argomento trattato a lezione. Inoltre abbiamo ritenuto utile implementare questa libreria per vedere l'applicazione effettiva del dominio ad un programma reale.\\
+Abbiamo colto anche l'occasione per implementare il tutto in \textit{C++}, linguaggio di programmazione che stiamo da poco imparando attraverso il corso seguito durante il secondo semestre, che prevede la consegna di un progetto a scelta dello studente (collegato al proprio corso di studio) scritto in questo linguaggio.\\
+\\
+L’argomento su cui si basa questo progetto è il dominio astratto degli intervalli per l’interpretazione astratta. Il contesto in cui ci si trova è il framework dell'interpretazione astratta, una delle tecniche principali usate per fare l’analisi statica di un programma.\\
+Si basa sull'idea che è possibile tener traccia di tutte le possibili esecuzioni di un programma a tempo di compilazione: ciò è reso possibile applicando un certo grado di approssimazione. Il livello di approssimazione (e di conseguenza la precisione e l'efficienza dell'analisi) dipende dal dominio astratto che si utilizza per analizzare il programma. Infatti, dato un elemento concreto, ci sono varie possibili approssimazioni di esso: ciò significa che si possono utilizzare più domini astratti per approssimare lo stesso elemento. Ogni dominio andrà a preservare differenti tipi di informazione e sono utili per dimostrare diversi tipi di proprietà.\\
+\\\\
+Il progetto sviluppato comprende le seguenti sezioni:
+\begin{itemize}
+	\item implementazione di una libreria suddivisa in classi per poter effettuare l'analisi di un programma attraverso gli intervalli corrispondenti a ciascuna variabile;
+	\item implementazione di un interprete per un semplice linguaggio di programmazione \textit{Toy}, di cui abbiamo prodotto sintassi e semantica;
+	\item implementazione di test per ciascuna classe e funzione in essa contenuta, al fine di ottenere una buona copertura del codice;
+	\item generazione automatica della documentazione di tutto il progetto, partendo dal codice sorgente, attraverso il tool \textit{Doxygen}.
+\end{itemize}
+
+
+\chapter*{Background}
+\addcontentsline{toc}{chapter}{Background}
+I programmi informatici spesso contengono errori. Eseguire un programma con dei \textit{bug} può portare a conseguenze indesiderate.
+Testare il codice non è sufficiente, poiché è possibile ricoprire solo una parte delle possibili tracce di esecuzione. Quando sono richieste garanzie importanti riguardo la correttezza di un programma, è necessario far uso dell'analisi statica.\\
+
+\section*{Analisi Statica}
+\addcontentsline{toc}{section}{Analisi Statica}
+L'\textit{analisi statica} del codice di un programma ci permette, tramite una serie di tecniche, di calcolare un'approssimazione sicura dell'insieme dei valori o dei comportamenti che si verificheranno durante l'esecuzione di tale programma. Lo scopo principale consiste nell'evitare ai compilatori inutili calcoli ridondanti. Un esempio può essere l'eliminazione di \textit{dead code} che permette di togliere delle parti di codice che il programma, durante la sua esecuzione, non raggiungerà mai.
+\\
+L'idea che sta sotto all'analisi statica consiste nel ricavare qualche informazione del programma senza doverlo eseguire; per il \textit{Teorema di Rice} ciò è indecidibile, dunque si introduce qualche grado di approssimazione. Se denotiamo con \textlbrackdbl \textsuperscript{.}\textrbrackdbl\hspace{0.01cm} il comportamento concreto del programma e con \textlbrackdbl \textsuperscript{.}\textrbrackdbl\textsuperscript{$\sharp$} il comportamento approssimato, otteniamo che:
+\begin{center}
+	\textlbrackdbl P\textrbrackdbl\hspace{0.01cm} $\subseteq$ \textlbrackdbl P\textrbrackdbl\textsuperscript{$\sharp$}
+\end{center}
+
+\noindent
+Uno dei principali approcci coinvolti nell'analisi statica è l'interpretazione astratta: essa modella il calcolo in termini di oggetto astratto per fornire alcune informazioni sui calcoli concreti.
+
+\section*{Interpretazione Astratta}
+\addcontentsline{toc}{section}{Interpretazione Astratta}
+L’\textit{interpretazione astratta} è un \textit{framework} per l’analisi statica che definisce un’astrazione corretta per la semantica concreta di un programma (potenzialmente infinita).
+\\
+La semantica astratta necessita di un dominio astratto per “catturare” le proprietà di interesse. Si tratta, in questo caso, di un dominio astratto numerico non relazionale poiché astrae ogni variabile in modo indipendente dalle altre.
+\\
+I domini numerici astratti sono importanti per gli analizzatori statici e vengono usati per verificare proprietà critiche di un programma come l'assenza di \textit{buffer overflow} o eventuali divisioni per zero.
+\newline
+
+\noindent
+Per creare un'astrazione secondo l'idea di base dell'\textit{interpretazione astratta} abbiamo bisogno di:
+\begin{itemize}
+	\item un \textit{dominio concreto C} che sarà il punto di partenza insieme alla \textit{semantica concreta}. Esso definisce una descrizione formale di uno stato di calcolo, mentre la semantica concreta è una funzione definita sul dominio concreto e associa un significato alle dichiarazioni del programma. La semantica concreta è l'espressione matematica più precisa riguardo il comportamento del programma;
+	\item un \textit{dominio astratto A} che sarà un'approssimazione del dominio concreto. Modella alcune proprietà dei calcoli concreti, tralasciando le informazioni superflue;
+	\item una \textit{funzione di astrazione}: $\alpha: C \rightarrow A$;
+	\item eventualmente una \textit{funzione di concretizzazione}: $\gamma: A \rightarrow C$.
+\end{itemize}
+
+
+
+\chapter*{Dominio astratto degli Intervalli}
+\addcontentsline{toc}{chapter}{Dominio astratto degli Intervalli}
+Il dominio astratto degli Intervalli è un dominio numerico non relazionale. Esso si basa sul concetto classico di \textit{intervallo aritmetico}, introdotto negli anni '60 da \textit{R. E. Moore}. È stato molto utilizzato nell'informatica ed è stato conseguentemente adattato per l'interpretazione astratta da \textit{P.} \& \textit{R. Cousot}.
+\\\\
+In questo dominio, un insieme di interi viene approssimato dal più piccolo intervallo che li contiene tutti, ad esempio l'insieme $\mathbb{Z}$ viene approssimato con $[l, u]$, dove $l=min \mathbb{Z}_{i\in\mathbb{N}}$, $u=max \mathbb{Z}_{i\in\mathbb{N}}$. Tuttavia, non è sempre possibile conoscere il limite superiore o inferiore dell'insieme di interi, ciò ammette intervalli $[l, u]$ in cui $l$ può essere $-\infty$ e/o $u$ può essere $+\infty$.
+\begin{align*}
+	\mathbb{I} = \{ [l, u] ~|~ l\in \mathbb{Z} \cup \{ -\infty \}, u\in \mathbb{Z} \cup \{ + \infty \}, l\leq u \}
+\end{align*}
+Questo dominio è infatti un reticolo completo. Si introduce l'ordinamento $\sqsubseteq$ tale che $[a, b] \sqsubseteq [c, d]$ se e solo se l'intero intervallo $[a, b]$ è interamente contenuto in $[c, d]$, cioè $a\geq c$ e $b\leq d$. L'elemento \textit{top} $\top$ è l'intervallo $[-\infty, \infty]$, poiché contiene qualunque altro intervallo. L'elemento \textit{bottom} $\bot$ è l'insieme vuoto che non contiene alcun elemento. Questo reticolo ha altezza infinita e per questo motivo necessita di un operatore di \textit{widening}.
+\\\\
+Questo dominio è veloce e facile da utilizzare, ma ha alcuni difetti. Per esempio, considerando l'insieme $\{-10, 5\}$ (cardinalità $= 2$). Questo coppia di valori viene approssimata con l'intervallo $[-10, 5]$ (cardinalità $= 16$) che è un'approssimazione eccessivamente ampia.
+
+
+\section*{Semantica astratta delle espressioni}
+\addcontentsline{toc}{section}{Semantica astratta delle espressioni}
+\begin{itemize}
+	\item $[l_1, u_1] +^\sharp [l_2, u_2] = [l_1 + l_2, u_1 + u_2]$
+	\item $-^\sharp[l, u] = [-u, -l]$
+	\item $[l_1, u_1] *^\sharp [l_2, u_2] = [a, b]$ dove:
+	\begin{itemize}
+		\item $a=min(l_1*l_2, l_1*u_2, u_1*l_2, u_1*u_2)$
+		\item $b=max(l_1*l_2, l_1*u_2, u_1*l_2, u_1*u_2)$
+	\end{itemize}
+	\item $[l_1, u_1] =^\sharp [l_2, u_2] =
+	\begin{cases}
+	[1, 1] &\text{ se } l_1=l_2=u_1=u_2\\
+	[0, 0] &\text{ se } u_1 < l_2 \lor ~u_2 < l_1\\
+	[0, 1] &\text{ altrimenti }
+	\end{cases}$
+	\item $[l_1, u_1] <^\sharp [l_2, u_2] =
+	\begin{cases}
+	[1, 1] &\text{ se } u_1<l_2 \\
+	[0, 0] &\text{ se } u_2 \leq l_1 \\
+	[0, 1] &\text{ altrimenti }
+	\end{cases}$
+\end{itemize}
+
+
+\section*{Semantica astratta dei comandi}
+\addcontentsline{toc}{section}{Semantica astratta dei comandi}
+$D = (\mathbb{V}ar \rightarrow \mathbb{I}) \cup \{\bot\}$
+\begin{align*}
+\llbracket ; \rrbracket^\sharp D &= D\\
+\llbracket NonZero(e) \rrbracket^\sharp D &=
+\begin{cases}
+\bot &\text{ se } [0, 0] = \llbracket e \rrbracket^\sharp D \\
+D &\text{ se } [0, 0] \neq \llbracket e \rrbracket^\sharp D~
+\end{cases}\\
+\llbracket Zero(e) \rrbracket^\sharp D &=
+\begin{cases}
+D &\text{ se } [0, 0] \subseteq \llbracket e \rrbracket^\sharp D~\\
+\bot &\text{ se } [0, 0] \not \subseteq \llbracket e \rrbracket^\sharp D~
+\end{cases}\\
+\llbracket x\leftarrow e \rrbracket^\sharp D &= D[x\mapsto \llbracket e\rrbracket^\sharp D]\\
+\llbracket x\leftarrow M[e] \rrbracket^\sharp D &= D[x\mapsto [-\infty, +\infty]]\\
+\llbracket M[e_1]\leftarrow e_2 \rrbracket^\sharp D &= D
+\end{align*}
+
+
+\section*{Accelerazione della convergenza}
+\addcontentsline{toc}{section}{Accelerazione della convergenza}
+Il dominio degli Intervalli non rispetta la \textit{ACC (ascending chain condition)}, dunque non garantisce la terminazione: per questo viene introdotto il \textit{widening}.
+
+\subsubsection*{Widening}
+\addcontentsline{toc}{subsection}{Widening}
+Un widening $[ \nabla : P \times P \to P  ]$ su un poset $ \langle P, \leq_P \rangle $ è una funzione che soddisfa:
+\begin{itemize}
+	\item $\forall x,y \in P : x \leq (x \nabla y ) \wedge y \leq (x \nabla y)$
+	\item per ogni catena ascendente $x_0 \leq x_1 \leq ... \leq x_n$ la catena definita come $y_0 = x_0, ..., y_{n+1} = y_n \nabla x_{n+1}$ non è strettamente crescente.
+\end{itemize}
+
+\noindent
+Dato che in interpretazione astratta è necessario garantire/accelerare la convergenza, viene usato il widening (che si sostituisce al least upper bound), dal momento che anche il calcolo astratto può divergere.
+Il risultato di un widening è un post-puntofisso  di $F^\nabla$, ovvero una sovra-approssimazione del punto fisso più piccolo di $f$.
+\\
+Il widening sul dominio degli intervalli funziona come segue:
+\begin{align*}
+\lbrack a, b \rbrack\ \nabla\ \lbrack c, d \rbrack = \lbrack e, f \rbrack \qquad \text{ t.c. ~~~~~}
+e = 
+\begin{cases}
+-\infty &\text{ se } c < a \\
+a &\text{ altrimenti}
+\end{cases}
+~~~~~~~f = 
+\begin{cases}
++\infty &\text{ se } b < d\\
+b &\text{ altrimenti }
+\end{cases}
+\end{align*}
+
+\subsubsection*{Narrowing}
+\addcontentsline{toc}{subsection}{Narrowing}
+Dato che il widening raggiunge un post-fixpoint, può capitare che si abbiano eccessive perdite di informazione, in questo caso viene usato il narrowing.
+\\
+	Il narrowing è una funzione $ \triangle : P \times P \to P$ tale che:
+	\begin{itemize}
+		\item $\forall x, y \in P: y \leq x \implies y \leq x\ \triangle\ y \leq x$
+		\item Per ogni catena discendente $x_0 \geq x_1 \geq ...$, la catena discendente $y_0=x_0, ..., y_{i+1} = y_i\ \triangle\ x_{i+1}$ non è strettamente decrescente.
+	\end{itemize}
+
+\noindent
+Per il dominio degli intervalli, il narrowing funziona come segue:
+\begin{align*}
+\lbrack a, b \rbrack\ \triangle\ \lbrack c, d \rbrack = \lbrack e, f \rbrack \qquad \text{ t.c. ~~~~~}
+e = 
+\begin{cases}
+c &\text{ se } a = -\infty \\
+a &\text{ altrimenti}
+\end{cases}
+~~~~~~~f = 
+\begin{cases}
+d &\text{ se } b = +\infty\\
+b &\text{ altrimenti }
+\end{cases}
+\end{align*}
+
+
+
+\chapter*{Implementazione}
+\addcontentsline{toc}{chapter}{Implementazione}
+\section*{Libreria}
+\addcontentsline{toc}{section}{Libreria}
+La libreria implementata è composta dalle seguenti classi, contenenti i relativi metodi:
+\begin{itemize}
+	\item \textit{AbstractInterval}: classe astratta che rappresenta un intervallo generico con numeri interi oppure a virgola mobile. È composta dai seguenti metodi:
+	\begin{itemize}
+		\item \verb|getLowerBound()|;
+		\item \verb|setLowerBound(Bound object)|;
+		\item \verb|getUpperBound()|;
+		\item \verb|setUpperBound(Bound object)|;
+		\item \verb|isFinite()|;
+		\item \verb|isContainedIn(AbstractInterval &i)|;
+		\item \verb|width()|;
+		\item \verb|intersects(AbstractInterval &i)|.
+	\end{itemize}
+	\item \textit{IntegerAbstractInterval}: classe che estende \textit{AbstractInterval} per intervalli i cui \textit{bound} sono numeri interi. I metodi implementati (oltre a quelli ereditati) sono:
+	\begin{itemize}
+		\item override di \verb|operator+|, \verb|operator-|, \verb|operator*|, \verb|operator/|, \verb|operator==|;
+		\item \verb|lub(IntegerAbstractInterval &i, IntegerAbstractInterval &ii)|;
+		\item \verb|negate()|;
+		\item \verb|widening(IntegerAbstractInterval &i)|;
+		\item \verb|narrowing(IntegerAbstractInterval &i)|.
+	\end{itemize}
+	\item \textit{FloatingPointAbstractInterval}: classe che estende \textit{AbstractInterval} per intervalli i cui \textit{bound} sono numeri a virgola mobile. I metodi implementati (oltre a quelli ereditati) sono:
+		\begin{itemize}
+			\item override di \verb|operator+|, \verb|operator-|, \verb|operator*|, \verb|operator/|, \verb|operator==|;
+			\item \verb|lub(FloatingPointAbstractInterval &i, FloatingPointAbstractInterval &ii)|;
+			\item \verb|negate()|;
+			\item \verb|widening(FloatingPointAbstractInterval &i)|;
+			\item \verb|narrowing(FloatingPointAbstractInterval &i)|.
+		\end{itemize}
+	
+	\tikzstyle{block} = [rectangle, draw, text width=2.5cm, text centered, rounded corners, minimum height=4em,fill=blue!20]
+	\tikzstyle{line} = [draw,thick, -latex']
+	\tikzstyle{cloud} = [draw, ellipse, text width=2.5cm, text centered]
+	\tikzstyle{edge from parent}=[->,thick,draw]
+	
+	\begin{center}
+		\begin{tikzpicture}[auto,edge from parent/.style={draw, latex-}]
+		\tikzstyle{level 1}=[sibling distance=50mm,level distance=15ex]
+		% Place nodes
+		\node [cloud] (cst) {Abstract Interval}
+		child{node [cloud] (pmt) {Integer\\AbstractInterval}
+		}
+		child{node [cloud] (ra) {FloatingPoint\\AbstractInterval}
+		};
+		\end{tikzpicture}
+	\end{center}
+	
+	\item \textit{Bound}: classe che rappresenta uno dei due \textit{bound} che compongono un intervallo. Può essere generato partendo da un numero intero, a virgola mobile oppure infinito. I metodi che lo compongono sono i seguenti:
+	\begin{itemize}
+		\item \verb|getIntValue()|;
+		\item \verb|getInfinityValue()|;
+		\item \verb|getFloatValue()|;
+		\item \verb|getValue()|;
+		\item \verb|is_infinity()|;
+		\item \verb|is_integer()|;
+		\item \verb|is_float()|;
+		\item \verb|revertSign()|;
+		\item override di \verb|operator+|, \verb|operator-|, \verb|operator*|, \verb|operator/|;
+		\item override di \verb|operator<|, \verb|operator<=|, \verb|operator>|, \verb|operator>=|, \verb|operator==|, \verb|operator!=|.
+	\end{itemize}
+	\item \textit{Infinity}: classe che rappresenta un valore infinito con il relativo segno, per essere inserito all'interno di un \textit{bound} per generare un intervallo infinito. I metodi implementati sono i seguenti:
+	\begin{itemize}
+		\item \verb|getSign()|;
+		\item \verb|setSign(char s)|;
+		\item \verb|isPositive()|;
+		\item \verb|isNegative()|;
+		\item \verb|negate()|;
+		\item \verb|max(Infinity *values)|;
+		\item \verb|min(Infinity *values)|;
+		\item override di \verb|operator+|, \verb|operator-|, \verb|operator*|, \verb|operator/|;
+		\item override di \verb|operator<|, \verb|operator<=|, \verb|operator>|, \verb|operator>=|, \verb|operator==|, \verb|operator!=|.
+	\end{itemize}
+	\item \textit{UndefinedOperationException}: classe che rappresenta l'eccezione per le operazioni non definite ed estende la classe \textit{exception}. È composta solamente dall'override del metodo \verb|what()| per indicare la stringa di errore da stampare a video.
+	
+\end{itemize}
+
+
+\section*{Linguaggio \textit{Toy}}
+\addcontentsline{toc}{section}{Linguaggio \textit{Toy}}
+Per provare in modo pratico la libreria del dominio astratto degli intervalli, abbiamo definito un semplice linguaggio chiamato \textit{Toy} (simile a quello utilizzato durante le lezioni del corso), di cui abbiamo definito la seguente sintassi.
+\newline
+
+\hrule
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily]
+<program>	::= {<statement>\n}$^*$
+<statement>	::= <assignment> | <conditional> | <loop>
+<assignment>	::= <identifier> = <expression>
+<conditional>	::= if <condition>\n {<assignment>\n}$^*$ endif
+<loop>		::= while <condition>\n {<assignment>\n}$^*$ endwhile 
+<expression>	::= <value> | <value> <operator> <value>
+<value>		::= <identifier> | <number> | -<number>
+<condition>	::= <value> <comparison> <value> | <boolean>
+<boolean>	::= true | false
+<operator>	::= + | - | * | / 
+<identifier>	::= <letter> <id>$^*$
+<comparison>	::= == | != | <= | >= | < | >
+<id>		::= <letter> | <digit>
+<number>	::= <digit>$^+$ | <digit>$^+$.<digit>$^+$
+<letter>	::= a | b | ... | z | A | B | ... | Z
+<digit>		::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+\end{lstlisting}
+
+\hrule
+\newpage
+\noindent
+Dalla sintassi appena descritta si possono notare le seguenti particolarità del linguaggio \textit{Toy}:
+\begin{itemize}
+	\item ogni keyword e operatore devono essere separati dagli altri attraverso uno spazio;
+	\item ogni statement deve terminare con il carattere di terminazione della riga;
+	\item non sono ammessi condizionali e loop in cascata;
+	\item non sono ammessi condizionali annidati nei loop e viceversa;
+	\item gli statement \textit{if} e \textit{while} non possono contenere più di una condizione da verificare;
+	\item l'indentazione può essere scelta dal programmatore;
+	\item una variabile non può essere dichiarata senza un valore di assegnamento.
+\end{itemize}
+
+\section*{Interprete per il linguaggio}
+\addcontentsline{toc}{section}{Interprete per il linguaggio}
+L'obiettivo ora consiste nell'implementazione di un \textit{interprete} che utlizza la libreria sviluppata per effettuare l'analisi di un programma scritto nel linguaggio \textit{Toy}, definito in precedenza.\\
+Questo interprete esegue in maniera ordinata le seguenti fasi di analisi:
+\begin{enumerate}
+	\item cerca il programma scritto nel file \textit{input.txt} con la sintassi del linguaggio \textit{Toy} (situato nella directory \textit{/build} del progetto \textit{ais\_interpreter});
+	\item legge il file riga per riga, riconoscendone lo statement contenuto (assegnamento, \textit{if} o \textit{while});
+	\item dopo aver individuato lo statement, apporta le modifiche alle variabili del programma, generando i rispettivi intervalli;
+	\item modifica gli intervalli attraverso le operazioni definite come metodi della libreria;
+	\item stampa a video una tabella indicando gli intervalli relativi a ciascuna variabile inizializzata nel programma oggetto (nome, \textit{lower bound} e \textit{upper bound}).
+	\newline
+\end{enumerate}
+
+\noindent
+Per svolgere le cinque fasi appena definite, l'interprete fa uso dei seguenti metodi:
+\begin{itemize}
+	\item \verb|main()|: cerca il file \textit{input.txt}, lo legge riga per riga e per ciascuna invoca le funzioni \verb|trim()| e \verb|split()| per identificare lo statement corrispondente. Successivamente invoca la funzione di gestione di quest'ultimo. Alla fine dell'analisi stampa a video gli intervalli risultanti, corrispondenti a ciascuna variabile del programma;
+	\item \verb|trim()|: prende in input le righe del file contenente il programma ed elimina gli spazi in testa (indentazione) ed in coda ad essa;
+	\item \verb|split()|: prende in input la riga e la divide per spazi in più \textit{keyword};
+	\item \verb|gestione_assegnamento()|: gestisce tutti i tipi di assegnamento:
+	\begin{itemize}
+		\item assegnamento semplice;
+		\item assegnamento complesso: contiene un'operazione aritmetica nel \textit{right-hand} gestita con la funzione \verb|calculator()|;
+	\end{itemize}
+	\item \verb|gestione_if()|: gestisce lo statement \textit{if} invocando \verb|fun()| per verificarne la~condizione;
+	\item \verb|gestione_while()|: gestisce lo statement \textit{while} invocando la funzione \verb|fun()| per la verifica della clausola condizionale;
+	\item \verb|calculator()|: gestisce le operazioni aritmetiche tra intervalli (mediante la libreria);
+	\item \verb|fun()|: verifica la clausola condizionale in uno statement \textit{if} oppure \textit{while}; se la condizione è falsa invoca la funzione \verb|find()|, altrimenti prosegue l'esecuzione;
+	\item \verb|find()|: funzione invocata quando la clausola condizionale degli statement \textit{if} oppure \textit{while} è falsa. Permette di saltare il corpo del relativo statement, ignorandone i comandi; il controllo riprenderà dalla prima riga seguente ad esso.
+\end{itemize}
+
+
+\section*{Test}
+\addcontentsline{toc}{section}{Test}
+Dopo aver implementato il codice relativo alla libreria del dominio degli intervalli, sono stati scritti i file di test (nella directory \textit{tests}), corrispondenti a ciascuna classe implementata, basandosi sulla libreria \textit{Catch2} (proposta dal docente del corso di programmazione \textit{C++}).\\
+L'obiettivo di ogni test è quello di fornire una copertura del codice il più vicino possibile al $100\%$. Per ottenere ciò, ad ogni funzione di ciascuna classe sono stati forniti degli input che permettessero di verificare la validità di ogni output ottenuto dall'esecuzione delle varie tracce del programma.\\
+Questi sono stati utili anche per verificare la corretta implementazione della libreria anche nei casi limiti delle operazioni tra intervalli.\\
+\\
+Per compilare ed avviare i test è sufficiente eseguire i seguenti comandi da terminale (spostandosi all'interno della directory \textit{/build}):
+\begin{itemize}
+	\item \verb|make| (per compilare l'intero codice);
+	\item \verb|make test| (per eseguire i test implementati).
+\end{itemize}
+
+
+\section*{Documentazione}
+\addcontentsline{toc}{section}{Documentazione}
+Per ogni classe e per ciascuna funzione in esso contenuta, è stata scritta la documentazione corrispondente attraverso lo standard tool \textit{Doxygen}. Questa, presente nel codice sorgente, una volta compilata ed avviata, verrà generata la directory \textit{/doc} contenente la documentazione \textit{HTML}.\\
+Per ciascun metodo viene definito quanto segue:
+\begin{itemize}
+	\item una breve descrizione (\verb|@brief|);
+	\item i parametri che riceve in input, se presenti (\verb|@param|);
+	\item il valore di ritorno, se la funzione non è \textit{void} (\verb|@return|).
+\end{itemize}
+
+\noindent
+In cima al codice di ogni file vengono riportati: il copyright (\verb|@copyright|), la licenza (\verb|@license|), gli autori (\verb|@authors|), la data di produzione (\verb|@date|), la versione del progetto (\verb|@version|) ed una breve descrizione della classe (\verb|@brief|).
+\newline
+
+\noindent
+Per generare la documentazione è sufficiente eseguire i seguenti comandi da terminale (spostandosi all'interno della directory \textit{/build}):
+\begin{itemize}
+	\item \verb|make| (per compilare l'intero codice);
+	\item \verb|make doc| (genera la documentazione nella directory \textit{doc}).
+\end{itemize}
+
+
+
+\chapter*{Conclusioni}
+\addcontentsline{toc}{chapter}{Conclusioni}
+Per lo sviluppo di questo progetto è stato necessario dedicare inizialmente del tempo per l’apprendimento e la familiarizzazione con il nuovo linguaggio \textit{C++}. Ciò è stato possibile attraverso il materiale didattico fornitoci durante le lezioni frontali del corso di \textit{Linguaggio di programmazione C++} ed alcune guide online:
+\begin{itemize}
+	\item guida di \textit{TutorialsPoint}: \url{https://www.tutorialspoint.com/cplusplus/index.htm};
+	\item slide del docente: \url{https://github.com/FedericoUnivr/Modern-CPP-Programming};
+	\item guida di \textit{Doxygen}: \url{http://www.stack.nl/~dimitri/doxygen/};
+	\item guida \textit{Catch2}: \url{https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md}.
+	\\
+\end{itemize}
+
+\noindent
+Per quanto riguarda analisi statica, interpretazione astratta e dominio degli Intervalli, è stato necessario un ripasso attraverso il materiale del docente e qualche approfondimento mediante documentazioni online:
+\begin{itemize}
+	\item slide del docente;
+	\item approfondimenti: \url{http://www.di.ens.fr/~cousot/AI/}.
+	\\
+\end{itemize}
+
+\noindent
+Durante l'implementazioni abbiamo incontrato piccoli ostacoli però sono stati presto superati senza eccessive perdite di tempo:
+\begin{itemize}
+	\item scarsa confidenza con il nuovo linguaggio a causa delle sue differenze rispetto ad altri linguaggi a noi più noti;
+	\item apprendimento della libreria \textit{Catch2} per la scrittura di test;
+	\item stesura del file \textit{CMakeLists.txt} per consentire la compilazione ed esecuzione del codice sorgente, dei test e della documentazione in maniera automatica;
+	\item ripasso per la gestione di casi limite durante le operazioni tra intervalli;
+	\item ripasso riguardo la teoria per la costruzione di un interprete.
+	\\
+\end{itemize}
+
+\noindent
+L'implementazione di questo progetto ci è stata utile per effettuare un ripasso di alcuni argomenti e per approfondire, osservandone il comportamento in ambito pratico, il funzionamento del dominio trattato durante le lezioni del corso di \textit{Analisi dei sistemi informatici}.\\
+Ci ha inoltre permesso di mettere in pratica le nostre conoscenze ottenute durante il percorso di studi triennale per la stesura di un interprete per un semplice linguaggio.\\
+Abbiamo avuto modo di imparare un nuovo linguaggio di programmazione approcciandolo subito attraverso la stesura di un progetto utile ed esteso anziché mediante banali esercizi.\\
+Ci siamo occupati di organizzare il codice in classi e documentarlo, per migliorarne la leggibilità. È stato prodotto un elevato numero di test per dare una buona copertura di tutto il codice sorgente al fine di evitare indesiderate situazioni che possano presentare errori a run-time.
+
+
+
+\end{document}

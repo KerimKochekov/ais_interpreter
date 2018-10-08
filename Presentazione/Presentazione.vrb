@@ -1,0 +1,17 @@
+\frametitle{Implementazione}
+		\framesubtitle{Documentazione}
+		È stata scritta la \alert{documentazione} attraverso lo standard tool \textit{Doxygen}:
+		\begin{itemize}
+			\item per ogni \alert{funzione} vengono definiti una breve descrizione (\verb|@brief|), i parametri di input (\verb|@param|) ed il valore di ritorno (\verb|@return|);
+			\item per ogni \alert{classe} viene definita una breve descrizione (\verb|@brief|);
+			\item per ogni \alert{file} vengono definiti il copyright (\verb|@copyright|), la licenza (\verb|@license|), gli autori (\verb|@authors|), la data di produzione (\verb|@date|) e la versione del progetto (\verb|@version|).
+		\end{itemize}
+
+		\medskip
+		Per generare la documentazione eseguire i seguenti comandi:
+		\begin{itemize}
+			\item \verb|make| (per compilare il codice);
+			\item \verb|make doc| (per generare la documentazione).
+		\end{itemize}
+		Questa viene generata nella directory \textit{/doc} in formato \textit{HTML}.
+
