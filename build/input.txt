@@ -1,6 +1,7 @@
-x = 0
-while true
-    x = 4
-    y = x
-    x = 3
+x = 3
+while x > 0
+    x = x - 1
+endwhile
+while x >= 1
+    x = x - 1
 endwhile

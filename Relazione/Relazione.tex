@@ -310,11 +310,11 @@ Per provare in modo pratico la libreria del dominio astratto degli intervalli, a
 <loop>		::= while <condition>\n {<assignment>\n}$^*$ endwhile 
 <expression>	::= <value> | <value> <operator> <value>
 <value>		::= <identifier> | <number> | -<number>
-<condition>	::= <value> <comparison> <value> | <boolean>
+<condition>	::= <identidier> <cmp> <number> | <boolean>
 <boolean>	::= true | false
 <operator>	::= + | - | * | / 
 <identifier>	::= <letter> <id>$^*$
-<comparison>	::= == | != | <= | >= | < | >
+<cmp>		::= <= | >= | < | >
 <id>		::= <letter> | <digit>
 <number>	::= <digit>$^+$ | <digit>$^+$.<digit>$^+$
 <letter>	::= a | b | ... | z | A | B | ... | Z
@@ -330,6 +330,7 @@ Dalla sintassi appena descritta si possono notare le seguenti particolarità del
 	\item ogni statement deve terminare con il carattere di terminazione della riga;
 	\item non sono ammessi condizionali e loop in cascata;
 	\item non sono ammessi condizionali annidati nei loop e viceversa;
+	\item non sono ammessi confronti tra sole variabili e soli numeri;
 	\item gli statement \textit{if} e \textit{while} non possono contenere più di una condizione da verificare;
 	\item l'indentazione può essere scelta dal programmatore;
 	\item una variabile non può essere dichiarata senza un valore di assegnamento.

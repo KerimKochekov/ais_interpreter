@@ -190,11 +190,11 @@
 <loop>		::= while <condition>\n {<assignment>\n}$^*$ endwhile 
 <expression>	::= <value> | <value> <operator> <value>
 <value>		::= <identifier> | <number> | -<number>
-<condition>	::= <value> <comparison> <value> | <boolean>
+<condition>	::= <identidier> <cmp> <number> | <boolean>
 <boolean>	::= true | false
 <operator>	::= + | - | * | / 
 <identifier>	::= <letter> <id>$^*$
-<comparison>	::= == | != | <= | >= | < | >
+<cmp>		::= <= | >= | < | >
 <id>		::= <letter> | <digit>
 <number>	::= <digit>$^+$ | <digit>$^+$.<digit>$^+$
 <letter>	::= a | b | ... | z | A | B | ... | Z
