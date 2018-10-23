@@ -1,8 +1,8 @@
 #define CATCH_CONFIG_MAIN
 
-#include "../include/Bound.hpp"
-#include "../include/UndefinedOperationException.hpp"
-#include "../libs/catch2/catch.hpp"
+#include "Bound.hpp"
+#include "UndefinedOperationException.hpp"
+#include "catch.hpp"
 
 TEST_CASE("Checks on Bound instances", "[Bound]") {
     domain::Bound i(domain::Infinity('+'));

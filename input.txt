@@ -1,0 +1,7 @@
+x = 0
+if x < 1
+    x = x + 1
+endif
+while x < 3
+    x = x + 1
+endwhile

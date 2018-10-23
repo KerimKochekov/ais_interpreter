@@ -1,12 +1,14 @@
 /**
  * @authors Marco Colognese, Mattia Rossini
  * @version v1.0
- * @date September, 2018
+ * @date October, 2018
  */
 
 /*! \mainpage Index Page
  *
  * \section intro_sec Introduction
+ *
+ * \subsection intro_sec1 Library
  *
  * The project provides a library for numeric intervals, used in static analysis
  * to check variables' content.
@@ -29,10 +31,23 @@
  * -# interval class, for integer and floating point values, inheriting from
  * AbstractInterval.
  *
+ *
+ * \subsection intro_sec2 Interpreter
+ *
+ * An interpreter has also been implemented that uses the library developed to
+ * perform the analysis of a program written in a simple language. This
+ * interpreter performs the following analysis steps in an orderly manner:
+ * -# search for the program written in the input.txt file (located in the
+ * /build directory of the project);
+ * -# read the file line by line, recognizing its content statement (assignment,
+ * if or while);
+ * -# after having identified the statement, make the changes to the variables
+ * of the program, generating the corresponding intervals;
+ * -# modify the intervals through the operations defined as library methods;
+ * -# print a table on screen indicating the intervals corresponding to each
+ * variable initialized in the object program (name, lower bound and upper
+ * bound).
  */
-
-#ifndef CPP_PROJECT_ABSTRACTINTERVAL_H
-#define CPP_PROJECT_ABSTRACTINTERVAL_H
 
 #pragma once
 #include "Bound.hpp"
@@ -67,17 +82,12 @@ public:
      * @param l the lower bound number
      * @param u the upper bound number
      */
-    AbstractInterval(Bound l, Bound u);
+    AbstractInterval(const Bound& l, const Bound& u);
 
     /**
      * @brief Empty constructor
      */
-    AbstractInterval();
-
-    /**
-     * @brief Destructor for AbstractInterval class
-     */
-    virtual ~AbstractInterval();
+    AbstractInterval() = default;
 
     /**
      * @brief Gets the lower bound of the current interval.
@@ -91,7 +101,7 @@ public:
      *
      * @param object the object to be set as lower bound.
      */
-    virtual void setLowerBound(Bound object) final;
+    virtual void setLowerBound(const Bound& object) final;
 
     /**
      * @brief Gets the upper bound of the current interval.
@@ -105,7 +115,7 @@ public:
      *
      * @param object the object to be set as upper bound.
      */
-    virtual void setUpperBound(Bound object) final;
+    virtual void setUpperBound(const Bound& object) final;
 
     /**
      * @brief Controls if the current interval contains just finite bounds.
@@ -124,7 +134,7 @@ public:
      * @return true if first interval is contained in the second interval,
      * false otherwise.
      */
-    virtual bool isContainedIn(AbstractInterval& i) = 0;
+    virtual bool isContainedIn(const AbstractInterval& i) = 0;
 
     /**
      * @brief Computes the width of the current interval.
@@ -142,9 +152,7 @@ public:
      * @return 'true' if the first interval intersects this interval,
      * 'false' otherwise
      */
-    virtual bool intersects(AbstractInterval& i) = 0;
+    virtual bool intersects(const AbstractInterval& i) = 0;
 };
 
 } // namespace domain
-
-#endif // CPP_PROJECT_ABSTRACTINTERVAL_H

@@ -1,16 +1,20 @@
 #define CATCH_CONFIG_MAIN
 
-#include "../include/FloatingPointAbstractInterval.hpp"
-#include "../libs/catch2/catch.hpp"
-
+#include "FloatingPointAbstractInterval.hpp"
+#include "catch.hpp"
 
 TEST_CASE("Floating Point interval operations", "[FP operations]") {
-    domain::FloatingPointAbstractInterval i(domain::Bound(3.5), domain::Bound(3.5));
-    domain::FloatingPointAbstractInterval ii(domain::Bound(1.5), domain::Bound(4.2));
-    domain::FloatingPointAbstractInterval iii(domain::Bound(domain::Infinity('-')),
-                                              domain::Bound(domain::Infinity('+')));
-    domain::FloatingPointAbstractInterval iv(domain::Bound(-1.3), domain::Bound(4.8));
-    domain::FloatingPointAbstractInterval v(domain::Bound(0), domain::Bound(domain::Infinity('+')));
+    domain::FloatingPointAbstractInterval i(domain::Bound(3.5),
+                                            domain::Bound(3.5));
+    domain::FloatingPointAbstractInterval ii(domain::Bound(1.5),
+                                             domain::Bound(4.2));
+    domain::FloatingPointAbstractInterval iii(
+        domain::Bound(domain::Infinity('-')),
+        domain::Bound(domain::Infinity('+')));
+    domain::FloatingPointAbstractInterval iv(domain::Bound(-1.3),
+                                             domain::Bound(4.8));
+    domain::FloatingPointAbstractInterval v(
+        domain::Bound(0), domain::Bound(domain::Infinity('+')));
 
     SECTION("Arithmetic operations", "[Interval operations]") {
         auto res1 = i + ii;

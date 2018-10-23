@@ -1,15 +1,18 @@
 #define CATCH_CONFIG_MAIN
 
-#include "../include/IntegerAbstractInterval.hpp"
-#include "../libs/catch2/catch.hpp"
+#include "IntegerAbstractInterval.hpp"
+#include "catch.hpp"
 
 TEST_CASE("Operations on IntegerInterval instances",
           "[IntegerAbstractInterval]") {
 
     domain::IntegerAbstractInterval i(domain::Bound(0), domain::Bound(1));
-    domain::IntegerAbstractInterval ii(domain::Bound(domain::Infinity('-')), domain::Bound(domain::Infinity('+')));
-    domain::IntegerAbstractInterval iii(domain::Bound(domain::Infinity('-')), domain::Bound(5));
-    domain::IntegerAbstractInterval iv(domain::Bound(0), domain::Bound(domain::Infinity('+')));
+    domain::IntegerAbstractInterval ii(domain::Bound(domain::Infinity('-')),
+                                       domain::Bound(domain::Infinity('+')));
+    domain::IntegerAbstractInterval iii(domain::Bound(domain::Infinity('-')),
+                                        domain::Bound(5));
+    domain::IntegerAbstractInterval iv(domain::Bound(0),
+                                       domain::Bound(domain::Infinity('+')));
     domain::IntegerAbstractInterval v(domain::Bound(-1), domain::Bound(1));
     domain::IntegerAbstractInterval vi(domain::Bound(1), domain::Bound(1));
 

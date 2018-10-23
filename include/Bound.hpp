@@ -1,11 +1,8 @@
 /**
  * @authors Marco Colognese, Mattia Rossini
  * @version v1.0
- * @date September, 2018
+ * @date October, 2018
  */
-
-#ifndef INTERVAL_ABSTRACT_DOMAIN_BOUND_HPP
-#define INTERVAL_ABSTRACT_DOMAIN_BOUND_HPP
 
 #pragma once
 #include "Infinity.hpp"
@@ -46,12 +43,13 @@ public:
      * @return the infinity value of the bound
      */
     Infinity getInfinityValue() const;
+
     /**
      * @brief Create a bound starting from a infinite value.
      *
      * @param value value of the bound
      */
-    explicit Bound(Infinity infinity);
+    explicit Bound(const Infinity& infinity);
 
     /**
      * @brief Create a bound starting from an integer value.
@@ -70,7 +68,7 @@ public:
     /**
      * @brief Empty constructor for generic bound.
      */
-    Bound();
+    Bound() = default;
 
     /**
      * @brief Return the value of the bound.
@@ -114,7 +112,7 @@ public:
      * @param b the bound argument
      * @return the resulting bound
      */
-    Bound operator+(Bound b);
+    friend Bound operator+(const Bound& a, const Bound& b);
 
     /**
      * @brief Performs the subtract operation between this bound's value and
@@ -123,7 +121,7 @@ public:
      * @param b the bound argument
      * @return the resulting bound
      */
-    Bound operator-(Bound b);
+    friend Bound operator-(const Bound& a, const Bound& b);
 
     /**
      * @brief Performs the multiply operation between this bound's value and
@@ -132,7 +130,7 @@ public:
      * @param b the bound argument
      * @return the resulting bound
      */
-    Bound operator*(Bound b);
+    friend Bound operator*(const Bound& a, const Bound& b);
 
     /**
      * @brief Performs the divide operation between this bound's value and the
@@ -141,7 +139,7 @@ public:
      * @param b the bound argument
      * @return the resulting bound
      */
-    Bound operator/(Bound b);
+    friend Bound operator/(Bound& a, Bound& b);
 
     /**
      * @brief Check if this bound is less then the argument.
@@ -150,7 +148,7 @@ public:
      * @return 'true' if this bound is less then the argument, 'false'
      * otherwise
      */
-    bool operator<(Bound b);
+    friend bool operator<(const Bound& a, const Bound& b);
 
     /**
      * @brief Check if this bound is less or equal then the argument.
@@ -159,7 +157,7 @@ public:
      * @return 'true' if this bound is less  or equal then the argument,
      * 'false' otherwise
      */
-    bool operator<=(Bound b);
+    friend bool operator<=(const Bound& a, const Bound& b);
 
     /**
      * @brief Check if this bound is greather then the argument.
@@ -168,7 +166,7 @@ public:
      * @return 'true' if this bound is greather then the argument, 'false'
      * otherwise
      */
-    bool operator>(Bound b);
+    friend bool operator>(const Bound& a, const Bound& b);
 
     /**
      * @brief Check if this bound is greather or equal then the argument.
@@ -177,27 +175,26 @@ public:
      * @return 'true' if this bound is greather or equal then the argument,
      * 'false' otherwise
      */
-    bool operator>=(Bound b);
+    friend bool operator>=(const Bound& a, const Bound& b);
+
+    /**
+     * @brief Check if this bound is equal then the argument.
+     *
+     * @param a the first bound argument
+     * @param b the second bound argument
+     * @return 'true' if this bound is equal then the argument, 'false'
+     * otherwise
+     */
+    friend bool operator==(const Bound& a, const Bound& b);
+
+    /**
+     * @brief Check if this bound and the argument are different.
+     *
+     * @param b the bound argument
+     * @return 'true' if the bounds are different, 'false'
+     * otherwise
+     */
+    friend bool operator!=(const Bound& a, const Bound& b);
 };
-
-/**
- * @brief Check if this bound is equal then the argument.
- *
- * @param a the first bound argument
- * @param b the second bound argument
- * @return 'true' if this bound is equal then the argument, 'false'
- * otherwise
- */
-bool operator==(const domain::Bound& a, const domain::Bound& b);
-
-/**
- * @brief Check if this bound and the argument are different.
- *
- * @param b the bound argument
- * @return 'true' if the bounds are different, 'false'
- * otherwise
- */
-bool operator!=(const Bound& a, const Bound& b);
 } // namespace domain
-
-#endif // INTERVAL_ABSTRACT_DOMAIN_BOUND_HPP
+  // namespace domain

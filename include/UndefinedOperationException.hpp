@@ -1,11 +1,8 @@
 /**
  * @authors Marco Colognese, Mattia Rossini
  * @version v1.0
- * @date September, 2018
+ * @date October, 2018
  */
-
-#ifndef CPP_PROJECT_UNDEFINEDOPERATIONEXCEPTION_HPP
-#define CPP_PROJECT_UNDEFINEDOPERATIONEXCEPTION_HPP
 
 #pragma once
 #include <stdexcept>
@@ -27,5 +24,3 @@ class UndefinedOperationException : public std::exception {
 };
 
 } // namespace exceptions
-
-#endif // CPP_PROJECT_UNDEFINEDOPERATIONEXCEPTION_HPP

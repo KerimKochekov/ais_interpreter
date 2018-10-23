@@ -1,17 +1,16 @@
-#include "../include/AbstractInterval.hpp"
+#include "AbstractInterval.hpp"
 
-domain::AbstractInterval::AbstractInterval(domain::Bound l, domain::Bound u) {
+domain::AbstractInterval::AbstractInterval(const domain::Bound& l,
+                                           const domain::Bound& u) {
     lowerBound = l;
     upperBound = u;
 }
-
-domain::AbstractInterval::~AbstractInterval() = default;
 
 domain::Bound domain::AbstractInterval::getLowerBound() const {
     return lowerBound;
 }
 
-void domain::AbstractInterval::setLowerBound(domain::Bound object) {
+void domain::AbstractInterval::setLowerBound(const domain::Bound& object) {
     lowerBound = object;
 }
 
@@ -19,8 +18,6 @@ domain::Bound domain::AbstractInterval::getUpperBound() const {
     return upperBound;
 }
 
-void domain::AbstractInterval::setUpperBound(domain::Bound object) {
+void domain::AbstractInterval::setUpperBound(const domain::Bound& object) {
     upperBound = object;
 }
-
-domain::AbstractInterval::AbstractInterval() = default;

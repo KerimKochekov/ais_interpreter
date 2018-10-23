@@ -1,67 +1,48 @@
-#include "../include/IntegerAbstractInterval.hpp"
-#include "../include/AbstractInterval.hpp"
-#include "../include/Bound.hpp"
-#include "../include/Infinity.hpp"
-#include "../include/UndefinedOperationException.hpp"
+#include "IntegerAbstractInterval.hpp"
+#include "AbstractInterval.hpp"
+#include "Bound.hpp"
+#include "Infinity.hpp"
+#include "UndefinedOperationException.hpp"
 
-bool domain::IntegerAbstractInterval::isFinite() {
+namespace domain {
+
+IntegerAbstractInterval::~IntegerAbstractInterval() {
+    delete[] a;
+}
+
+bool IntegerAbstractInterval::isFinite() {
     return !(getLowerBound().is_infinity() || getUpperBound().is_infinity());
 }
 
-domain::IntegerAbstractInterval domain::IntegerAbstractInterval::
-                        operator+(domain::IntegerAbstractInterval& i) {
+IntegerAbstractInterval operator+(const IntegerAbstractInterval& i,
+                                  const IntegerAbstractInterval& ii) {
     Bound l, u;
 
-    l = getLowerBound() + i.getLowerBound();
-    u = getUpperBound() + i.getUpperBound();
+    l = i.getLowerBound() + ii.getLowerBound();
+    u = i.getUpperBound() + ii.getUpperBound();
 
     return IntegerAbstractInterval(l, u);
 }
 
-domain::IntegerAbstractInterval domain::IntegerAbstractInterval::
-                        operator-(domain::IntegerAbstractInterval& i) {
+IntegerAbstractInterval operator-(const IntegerAbstractInterval& i,
+                                  const IntegerAbstractInterval& ii) {
 
-    return IntegerAbstractInterval(getLowerBound() - i.getUpperBound(),
-                                   getUpperBound() - i.getLowerBound());
+    return IntegerAbstractInterval(i.getLowerBound() - ii.getUpperBound(),
+                                   i.getUpperBound() - ii.getLowerBound());
 }
 
-domain::IntegerAbstractInterval domain::IntegerAbstractInterval::
-                        operator*(domain::IntegerAbstractInterval& i) {
-    domain::IntegerAbstractInterval ii(i.getLowerBound(), i.getUpperBound());
-    domain::Bound                   l, u, l1, u1, l2, u2;
-
-    l1 = getLowerBound();
-    u1 = getUpperBound();
-    l2 = ii.getLowerBound();
-    u2 = ii.getUpperBound();
-    domain::Bound* val = new domain::Bound[4]{ l1 * l2, l1 * u2, l2 * u1, u1 * u2 };
-    l = val[0];
-    u = l;
-
-    for (int j = 0; j < 4; j++) {
-        if (val[j] < l)
-            l = val[j];
-        if (val[j] > u)
-            u = val[j];
-    }
-
-    delete[] val;
-
-    return IntegerAbstractInterval(l, u);
-}
-
-domain::IntegerAbstractInterval domain::IntegerAbstractInterval::
-                        operator/(domain::IntegerAbstractInterval& i) {
-    IntegerAbstractInterval ii(i.getLowerBound(), i.getUpperBound());
+IntegerAbstractInterval operator*(const IntegerAbstractInterval& i,
+                                  const IntegerAbstractInterval& ii) {
+    IntegerAbstractInterval iii(ii.getLowerBound(), ii.getUpperBound());
     Bound                   l, u, l1, u1, l2, u2;
 
-    l1 = getLowerBound();
-    u1 = getUpperBound();
-    l2 = ii.getLowerBound();
-    u2 = ii.getUpperBound();
-    Bound* val = new Bound[4]{ l1 / l2, l1 / u2, l2 / u1, u1 / u2 };
-    l = val[0];
-    u = l;
+    l1         = i.getLowerBound();
+    u1         = i.getUpperBound();
+    l2         = iii.getLowerBound();
+    u2         = iii.getUpperBound();
+    Bound* val = new Bound[4]{ l1 * l2, l1 * u2, l2 * u1, u1 * u2 };
+    l          = val[0];
+    u          = l;
 
     for (int j = 0; j < 4; j++) {
         if (val[j] < l)
@@ -75,14 +56,40 @@ domain::IntegerAbstractInterval domain::IntegerAbstractInterval::
     return IntegerAbstractInterval(l, u);
 }
 
-bool domain::IntegerAbstractInterval::operator==(domain::IntegerAbstractInterval& i) {
-    return getUpperBound() == i.getUpperBound() &&
-            getLowerBound() == i.getLowerBound();
+IntegerAbstractInterval operator/(const IntegerAbstractInterval& i,
+                                  const IntegerAbstractInterval& ii) {
+    IntegerAbstractInterval iii(ii.getLowerBound(), ii.getUpperBound());
+    Bound                   l, u, l1, u1, l2, u2;
+
+    l1         = i.getLowerBound();
+    u1         = i.getUpperBound();
+    l2         = iii.getLowerBound();
+    u2         = iii.getUpperBound();
+    Bound* val = new Bound[4]{ l1 / l2, l1 / u2, l2 / u1, u1 / u2 };
+    l          = val[0];
+    u          = l;
+
+    for (int j = 0; j < 4; j++) {
+        if (val[j] < l)
+            l = val[j];
+        if (val[j] > u)
+            u = val[j];
+    }
+
+    delete[] val;
+
+    return IntegerAbstractInterval(l, u);
 }
 
-domain::IntegerAbstractInterval
-domain::IntegerAbstractInterval::lub(IntegerAbstractInterval& i,
-                             IntegerAbstractInterval& ii) {
+bool operator==(const IntegerAbstractInterval& i,
+                const IntegerAbstractInterval& ii) {
+    return i.getUpperBound() == ii.getUpperBound() &&
+           i.getLowerBound() == ii.getLowerBound();
+}
+
+IntegerAbstractInterval
+IntegerAbstractInterval::lub(const IntegerAbstractInterval& i,
+                             const IntegerAbstractInterval& ii) {
     Bound lLub, uLub;
 
     if (i.getLowerBound() < ii.getLowerBound())
@@ -98,22 +105,22 @@ domain::IntegerAbstractInterval::lub(IntegerAbstractInterval& i,
     return IntegerAbstractInterval(lLub, uLub);
 }
 
-domain::Bound domain::IntegerAbstractInterval::width() {
+Bound IntegerAbstractInterval::width() {
     if (getUpperBound().is_infinity() || getLowerBound().is_infinity()) {
         return Bound(Infinity('+'));
     }
     return Bound(getUpperBound() - getLowerBound() + Bound(1));
 }
 
-domain::IntegerAbstractInterval domain::IntegerAbstractInterval::negate() {
+IntegerAbstractInterval IntegerAbstractInterval::negate() {
     Bound u = getLowerBound().revertSign();
     Bound l = getUpperBound().revertSign();
 
     return IntegerAbstractInterval(l, u);
 }
 
-domain::IntegerAbstractInterval
-domain::IntegerAbstractInterval::widening(domain::IntegerAbstractInterval& i) {
+IntegerAbstractInterval
+IntegerAbstractInterval::widening(const IntegerAbstractInterval& i) {
     Bound l, u;
 
     if (i.getLowerBound() < getLowerBound()) {
@@ -131,16 +138,16 @@ domain::IntegerAbstractInterval::widening(domain::IntegerAbstractInterval& i) {
     return IntegerAbstractInterval(l, u);
 }
 
-domain::IntegerAbstractInterval
-domain::IntegerAbstractInterval::narrowing(domain::IntegerAbstractInterval& i) {
-    domain::IntegerAbstractInterval res = domain::IntegerAbstractInterval();
-    if (getLowerBound() == domain::Bound(Infinity('-'))) {
+IntegerAbstractInterval
+IntegerAbstractInterval::narrowing(const IntegerAbstractInterval& i) {
+    IntegerAbstractInterval res = IntegerAbstractInterval();
+    if (getLowerBound() == Bound(Infinity('-'))) {
         res.setLowerBound(i.getLowerBound());
     } else {
         res.setLowerBound(getLowerBound());
     }
 
-    if (getUpperBound() == domain::Bound(Infinity('+'))) {
+    if (getUpperBound() == Bound(Infinity('+'))) {
         res.setUpperBound(i.getUpperBound());
     } else {
         res.setUpperBound(getUpperBound());
@@ -149,12 +156,13 @@ domain::IntegerAbstractInterval::narrowing(domain::IntegerAbstractInterval& i) {
     return res;
 }
 
-bool domain::IntegerAbstractInterval::intersects(domain::AbstractInterval& i) {
+bool IntegerAbstractInterval::intersects(const AbstractInterval& i) {
     return !((i.getUpperBound() < getLowerBound()) ^
              !(i.getLowerBound() <= getUpperBound()));
 }
 
-bool domain::IntegerAbstractInterval::isContainedIn(domain::AbstractInterval& i) {
+bool IntegerAbstractInterval::isContainedIn(const AbstractInterval& i) {
     return getLowerBound() <= i.getLowerBound() &&
            !(getUpperBound() < i.getUpperBound());
 }
+} // namespace domain

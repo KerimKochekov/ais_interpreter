@@ -27,22 +27,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * </blockquote>}
  *
- * @authors Marco Colognese, Mattia Rossini                                     <br>
- *          Univerity of Verona, Dept. of Computer Science                      <br>
- *          marco.colognese@studenti.univr.it, mattia.rossini@studenti.univr.it
- * @date September, 2018
+ * @authors Marco Colognese, Mattia Rossini <br> Univerity of Verona, Dept. of
+ * Computer Science                      <br> marco.colognese@studenti.univr.it,
+ * mattia.rossini@studenti.univr.it
+ * @date October, 2018
  * @version v1.0
  */
 
-#include <iostream>
+#include "AbstractInterval.hpp"
+#include "Bound.hpp"
+#include "FloatingPointAbstractInterval.hpp"
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
-
-#include "../include/AbstractInterval.hpp"
-#include "../include/Bound.hpp"
-#include "../include/FloatingPointAbstractInterval.hpp"
 
 /**
  * @brief variable-value map.
@@ -52,27 +51,28 @@ std::map<std::string, double> assegnamenti;
 /**
  * @brief interval-value map for if statement.
  */
-std::map <std::string, domain::FloatingPointAbstractInterval> intervals_if;
+std::map<std::string, domain::FloatingPointAbstractInterval> intervals_if;
 
 /**
  * @brief interval-value map for if statement.
  */
-std::map <std::string, domain::FloatingPointAbstractInterval> intervals_if_false;
+std::map<std::string, domain::FloatingPointAbstractInterval> intervals_if_false;
 
 /**
  * @brief interval-value map.
  */
-std::map <std::string, domain::FloatingPointAbstractInterval> intervals;
+std::map<std::string, domain::FloatingPointAbstractInterval> intervals;
 
 /**
  * @brief interval-value map for loops.
  */
-std::map <std::string, domain::FloatingPointAbstractInterval> intervals_loop;
+std::map<std::string, domain::FloatingPointAbstractInterval> intervals_loop;
 
 /**
  * @brief interval-value map for loops.
  */
-std::map <std::string, domain::FloatingPointAbstractInterval> intervals_loop_false;
+std::map<std::string, domain::FloatingPointAbstractInterval>
+    intervals_loop_false;
 
 /**
  * @brief iterator for interval's map.
@@ -107,7 +107,7 @@ std::string line;
 /**
  * @brief code line splitted by spaces.
  */
-std::vector <std::string> split_line;
+std::vector<std::string> split_line;
 
 /**
  * @brief couter for loop iterations.
@@ -144,7 +144,6 @@ int current_pos = 0;
  */
 std::ifstream in;
 
-
 /**
  * @brief Performs the split operation by an input char of a string.
  *
@@ -152,15 +151,15 @@ std::ifstream in;
  * @param delim char used to split the input string
  * @param v split's output
  */
-void split(const std::string &s, char delim, std::vector <std::string> &v) {
-    int i = 0;
+void split(const std::string& s, char delim, std::vector<std::string>& v) {
+    int i   = 0;
     int pos = s.find(delim);
-    while (pos != std::string::npos) {
+    while (pos != (int) std::string::npos) {
         v.push_back(s.substr(i, pos - i));
-        i = ++pos;
+        i   = ++pos;
         pos = s.find(delim, pos);
 
-        if (pos == std::string::npos)
+        if (pos == (int) std::string::npos)
             v.push_back(s.substr(i, s.length()));
     }
 }
@@ -171,13 +170,12 @@ void split(const std::string &s, char delim, std::vector <std::string> &v) {
  * @param s string to convert to double
  * @return the string converted
  */
-double stod1(std::string &s) {
+double stod1(std::string& s) {
     if (s.at(0) == '-') {
         return -stod(s.substr(1, s.size()));
     } else
         return stod(s);
 }
-
 
 /**
  * @brief Performs the trim operation of an input string.
@@ -185,7 +183,7 @@ double stod1(std::string &s) {
  * @param str input string
  * @return the trimmed string
  */
-std::string trim(const std::string &str) {
+std::string trim(const std::string& str) {
     size_t first = str.find_first_not_of(' ');
     if (std::string::npos == first)
         return str;
@@ -193,7 +191,6 @@ std::string trim(const std::string &str) {
     size_t last = str.find_last_not_of(' ');
     return str.substr(first, (last - first + 1));
 }
-
 
 /**
  * @brief Performs a choosen arithmetic operation between intervals and values.
@@ -232,9 +229,9 @@ domain::FloatingPointAbstractInterval calculator(double i, double ii, char op) {
     }
 }
 
-
 /**
- * @brief finds and skips dead-code when the condition of "if" and "while" statements is false.
+ * @brief finds and skips dead-code when the condition of "if" and "while"
+ * statements is false.
  */
 void find() {
 
@@ -244,19 +241,25 @@ void find() {
         split_line.clear();
         split(line, ' ', split_line);
 
-        if (line.compare("endif") == 0){
+        if (line.compare("endif") == 0) {
             if_false = false;
             return;
         }
 
-        if (line.compare("endwhile") == 0 ){
-            if(loop_false){
-                for (it = intervals_loop_false.begin(); it != intervals_loop_false.end(); it++) {
-                    std::map<std::string, domain::FloatingPointAbstractInterval>::iterator it1;
+        if (line.compare("endwhile") == 0) {
+            if (loop_false) {
+                for (it = intervals_loop_false.begin();
+                     it != intervals_loop_false.end();
+                     it++) {
+                    std::map<std::string,
+                             domain::FloatingPointAbstractInterval>::iterator
+                        it1;
                     it1 = intervals.find(it->first);
                     if (it1 != intervals.end())
-                        intervals.at(it->first) = intervals_loop_false.at(it->first).lub(intervals_loop_false.at(it->first),
-                                                                                   intervals.at(it->first));
+                        intervals.at(it->first) =
+                            intervals_loop_false.at(it->first).lub(
+                                intervals_loop_false.at(it->first),
+                                intervals.at(it->first));
                     else
                         intervals[it->first] = it->second;
                 }
@@ -268,81 +271,47 @@ void find() {
     }
 }
 
-
 /**
- * @brief checks the condition in a "if" or "while" statements. If the condition is false, it calls the find() function.
+ * @brief checks the condition in a "if" or "while" statements. If the condition
+ * is false, it calls the find() function.
  *
  * @param ctr string containing "endif" or "endwhile"
  * @param expr operator's code using in condition clause
  */
 void fun(std::string ctr, int expr) {
 
-    int n_var = 0; // 1 = var a Sx, 2 = var a Dx, 3 = var a Sx e Dx;
-
     if (!isdigit(split_line[3].at(0)) &&
-        split_line[3].at(0) != '-') {    //se viene fatto riferimento ad una variabile, ne prendo il valore
-        value2 = assegnamenti.at(split_line[3]);
+        split_line[3].at(0) != '-') { // se viene fatto riferimento ad una
+                                      // variabile, ne prendo il valore
+        value2    = assegnamenti.at(split_line[3]);
         interval2 = intervals.at(split_line[3]);
-        n_var = 2;
 
-    } else {    //se si fa riferimento ad un valore
-        value2 = stod1(split_line[3]);
-        interval2 = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3])),
-                                                          domain::Bound(stod1(split_line[3])));
+    } else { // se si fa riferimento ad un valore
+        value2    = stod1(split_line[3]);
+        interval2 = domain::FloatingPointAbstractInterval(
+            domain::Bound(stod1(split_line[3])),
+            domain::Bound(stod1(split_line[3])));
     }
 
     if (!isdigit(split_line[1].at(0)) &&
-        split_line[1].at(0) != '-') {    //se viene fatto riferimento ad una variabile, ne prendo il valore
-        value1 = assegnamenti.at(split_line[1]);
+        split_line[1].at(0) != '-') { // se viene fatto riferimento ad una
+                                      // variabile, ne prendo il valore
+        value1    = assegnamenti.at(split_line[1]);
         interval1 = intervals.at(split_line[1]);
-            n_var = 1;
 
-    } else {    //se si fa riferimento ad un valore
-        value1 = stod1(split_line[1]);
-        interval1 = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[1])),
-                                                          domain::Bound(stod1(split_line[1])));
+    } else { // se si fa riferimento ad un valore
+        value1    = stod1(split_line[1]);
+        interval1 = domain::FloatingPointAbstractInterval(
+            domain::Bound(stod1(split_line[1])),
+            domain::Bound(stod1(split_line[1])));
     }
 
-
-    if(n_var == 2){
-        std::string temp = split_line[1];
-        split_line[1] = split_line[3];
-        split_line[3] = temp;
-        int value_supp = value1;
-        value1 = value2;
-        value2 = value_supp;
-        domain::FloatingPointAbstractInterval interval_supp = interval1;
-        interval1 = interval2;
-        interval2 = interval_supp;
-
-        switch (expr){
-            case 3:
-                expr = 4;
-                break;
-
-            case 4:
-                expr = 2;
-                break;
-
-            case 5:
-                expr = 6;
-                break;
-
-            case 6:
-                expr = 5;
-                break;
-        }
-        n_var = 1;
-    }
-
-    if(n_var != 0) {
-        fix_supp = intervals[split_line[1]];
-        fix_var = split_line[1];
-    }
+    fix_supp = intervals[split_line[1]];
+    fix_var  = split_line[1];
 
     switch (expr) {
-        case 3: //operatore >
-            if (interval2.getLowerBound().operator>=(interval1.getUpperBound())) {
+        case 3: // operatore >
+            if (interval2.getLowerBound() >= interval1.getUpperBound()) {
                 do {
                     find();
                 } while (line.compare(ctr) != 0);
@@ -353,29 +322,42 @@ void fun(std::string ctr, int expr) {
                     ct_loop = 0;
                     intervals_loop.clear();
                 }
-            }
-            else if(ctr.compare("endif") == 0 && n_var == 1 && intervals[split_line[1]].getLowerBound().getFloatValue() <= stod1(split_line[3])){
+            } else if (ctr.compare("endif") == 0 &&
+                       intervals[split_line[1]]
+                               .getLowerBound()
+                               .getFloatValue() <= stod1(split_line[3])) {
                 if_false = true;
-                for (it = intervals_if.begin(); it != intervals_if.end(); it++) {
+                for (it = intervals_if.begin(); it != intervals_if.end();
+                     it++) {
                     intervals_if_false.at(it->first) = intervals.at(it->first);
                 }
-                intervals_if_false[split_line[1]] = domain::FloatingPointAbstractInterval(intervals[split_line[1]].getLowerBound(),
-                                                                                              domain::Bound(stod1(split_line[3])));
-            }
-            else if (ctr.compare("endwhile") == 0 && n_var == 1 && intervals[split_line[1]].getLowerBound().getFloatValue() <= stod1(split_line[3])){
+                intervals_if_false[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        intervals[split_line[1]].getLowerBound(),
+                        domain::Bound(stod1(split_line[3])));
+            } else if (ctr.compare("endwhile") == 0 &&
+                       intervals[split_line[1]]
+                               .getLowerBound()
+                               .getFloatValue() <= stod1(split_line[3])) {
 
-                if(!loop_false){
+                if (!loop_false) {
                     loop_false = true;
-                    intervals_loop_false[split_line[1]] = domain::FloatingPointAbstractInterval(intervals[split_line[1]].getLowerBound(),
-                                                                                                domain::Bound(stod1(split_line[3])));
+                    intervals_loop_false[split_line[1]] =
+                        domain::FloatingPointAbstractInterval(
+                            intervals[split_line[1]].getLowerBound(),
+                            domain::Bound(stod1(split_line[3])));
                 }
-                intervals_loop[split_line[1]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3]) +1), domain::Bound(intervals[split_line[1]].getUpperBound().getFloatValue()));
-
+                intervals_loop[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[3]) + 1),
+                        domain::Bound(intervals[split_line[1]]
+                                          .getUpperBound()
+                                          .getFloatValue()));
             }
             break;
 
-        case 4: //operatore <
-            if (interval1.getLowerBound().operator>=(interval2.getUpperBound())) {
+        case 4: // operatore <
+            if (interval1.getLowerBound() >= interval2.getUpperBound()) {
                 do {
                     find();
                 } while (line.compare(ctr) != 0);
@@ -386,29 +368,38 @@ void fun(std::string ctr, int expr) {
                     ct_loop = 0;
                     intervals_loop.clear();
                 }
-            }
-            else if(ctr.compare("endif") == 0 && n_var == 1 && interval1.getUpperBound().getFloatValue() >= stod1(split_line[3])){
+            } else if (ctr.compare("endif") == 0 &&
+                       interval1.getUpperBound().getFloatValue() >=
+                           stod1(split_line[3])) {
                 if_false = true;
-                for (it = intervals_if.begin(); it != intervals_if.end(); it++) {
+                for (it = intervals_if.begin(); it != intervals_if.end();
+                     it++) {
                     intervals_if_false.at(it->first) = intervals.at(it->first);
                 }
-                intervals_if_false[split_line[1]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3])), intervals[split_line[1]].getUpperBound());
-//std::cout << intervals_if_false[split_line[1]].getLowerBound().getFloatValue() << " " << intervals_if_false[split_line[1]].getUpperBound().getFloatValue() << std::endl;
-            }
-            else if (ctr.compare("endwhile") == 0 && interval1.getUpperBound().getFloatValue() >= stod1(split_line[3])){
+                intervals_if_false[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[3])),
+                        intervals[split_line[1]].getUpperBound());
+            } else if (ctr.compare("endwhile") == 0 &&
+                       interval1.getUpperBound().getFloatValue() >=
+                           stod1(split_line[3])) {
 
-                if(!loop_false){
+                if (!loop_false) {
                     loop_false = true;
-                    intervals_loop_false[split_line[1]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3])), intervals[split_line[1]].getUpperBound());
+                    intervals_loop_false[split_line[1]] =
+                        domain::FloatingPointAbstractInterval(
+                            domain::Bound(stod1(split_line[3])),
+                            intervals[split_line[1]].getUpperBound());
                 }
-                intervals_loop[split_line[1]] = domain::FloatingPointAbstractInterval(intervals[split_line[1]].getLowerBound(),
-                                                                                            domain::Bound(stod1(split_line[3]) - 1));
-
+                intervals_loop[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        intervals[split_line[1]].getLowerBound(),
+                        domain::Bound(stod1(split_line[3]) - 1));
             }
             break;
 
-        case 5: //operatore <=
-            if (interval1.getLowerBound().operator>(interval2.getUpperBound())) {
+        case 5: // operatore <=
+            if (interval1.getLowerBound() > interval2.getUpperBound()) {
                 do {
                     find();
                 } while (line.compare(ctr) != 0);
@@ -419,29 +410,44 @@ void fun(std::string ctr, int expr) {
                     ct_loop = 0;
                     intervals_loop.clear();
                 }
-            }
-            else if(ctr.compare("endif") == 0 && n_var == 1 && intervals[split_line[1]].getUpperBound().getFloatValue() > stod1(split_line[3])){
+            } else if (ctr.compare("endif") == 0 &&
+                       intervals[split_line[1]]
+                               .getUpperBound()
+                               .getFloatValue() > stod1(split_line[3])) {
                 if_false = true;
-                for (it = intervals_if.begin(); it != intervals_if.end(); it++) {
+                for (it = intervals_if.begin(); it != intervals_if.end();
+                     it++) {
                     intervals_if_false.at(it->first) = intervals.at(it->first);
                 }
-                intervals_if_false[split_line[1]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3]) + 1), intervals[split_line[1]].getUpperBound());
-                intervals_if[split_line[1]] = domain::FloatingPointAbstractInterval(intervals[split_line[1]].getLowerBound(), domain::Bound(stod1(split_line[3])));
+                intervals_if_false[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[3]) + 1),
+                        intervals[split_line[1]].getUpperBound());
+                intervals_if[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        intervals[split_line[1]].getLowerBound(),
+                        domain::Bound(stod1(split_line[3])));
 
-            }
-            else if (ctr.compare("endwhile") == 0 && n_var == 1 && intervals[split_line[1]].getUpperBound().getFloatValue() > stod1(split_line[3])){
-                if(!loop_false){
+            } else if (ctr.compare("endwhile") == 0 &&
+                       intervals[split_line[1]]
+                               .getUpperBound()
+                               .getFloatValue() > stod1(split_line[3])) {
+                if (!loop_false) {
                     loop_false = true;
-                    intervals_loop_false[split_line[1]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3]) + 1), intervals[split_line[1]].getUpperBound());
+                    intervals_loop_false[split_line[1]] =
+                        domain::FloatingPointAbstractInterval(
+                            domain::Bound(stod1(split_line[3]) + 1),
+                            intervals[split_line[1]].getUpperBound());
                 }
-                intervals_loop[split_line[1]] = domain::FloatingPointAbstractInterval(intervals[split_line[1]].getLowerBound(),
-                                                                                      domain::Bound(stod1(split_line[3])));
-
+                intervals_loop[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        intervals[split_line[1]].getLowerBound(),
+                        domain::Bound(stod1(split_line[3])));
             }
             break;
 
-        case 6: //operatore >=
-            if (interval2.getUpperBound().operator<(interval1.getLowerBound())) {
+        case 6: // operatore >=
+            if (interval2.getUpperBound() < interval1.getLowerBound()) {
                 do {
                     find();
                 } while (line.compare(ctr) != 0);
@@ -452,99 +458,129 @@ void fun(std::string ctr, int expr) {
                     ct_loop = 0;
                     intervals_loop.clear();
                 }
-            }
-            else if(ctr.compare("endif") == 0 && n_var == 1 && intervals[split_line[1]].getLowerBound().getFloatValue() < stod1(split_line[3])){
+            } else if (ctr.compare("endif") == 0 &&
+                       intervals[split_line[1]]
+                               .getLowerBound()
+                               .getFloatValue() < stod1(split_line[3])) {
                 if_false = true;
-                for (it = intervals_if.begin(); it != intervals_if.end(); it++) {
+                for (it = intervals_if.begin(); it != intervals_if.end();
+                     it++) {
                     intervals_if_false.at(it->first) = intervals.at(it->first);
                 }
-                intervals_if_false[split_line[1]] = domain::FloatingPointAbstractInterval(intervals[split_line[1]].getLowerBound(),
-                                                                                          domain::Bound(stod1(split_line[3]) - 1));
-                intervals_if[split_line[1]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3])), intervals[split_line[1]].getUpperBound());
+                intervals_if_false[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        intervals[split_line[1]].getLowerBound(),
+                        domain::Bound(stod1(split_line[3]) - 1));
+                intervals_if[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[3])),
+                        intervals[split_line[1]].getUpperBound());
 
-            }
-            else if (ctr.compare("endwhile") == 0 && n_var == 1 && intervals[split_line[1]].getLowerBound().getFloatValue() < stod1(split_line[3])){
-                if(!loop_false){
+            } else if (ctr.compare("endwhile") == 0 &&
+                       intervals[split_line[1]]
+                               .getLowerBound()
+                               .getFloatValue() < stod1(split_line[3])) {
+                if (!loop_false) {
                     loop_false = true;
-                    intervals_if_false[split_line[1]] = domain::FloatingPointAbstractInterval(intervals[split_line[1]].getLowerBound(),
-                                                                                              domain::Bound(stod1(split_line[3]) - 1));
+                    intervals_if_false[split_line[1]] =
+                        domain::FloatingPointAbstractInterval(
+                            intervals[split_line[1]].getLowerBound(),
+                            domain::Bound(stod1(split_line[3]) - 1));
                 }
-                intervals_loop[split_line[1]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[3])), intervals[split_line[1]].getUpperBound());
-
+                intervals_loop[split_line[1]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[3])),
+                        intervals[split_line[1]].getUpperBound());
             }
             break;
     }
 }
 
-
 /**
- * @brief manages "while" statements. Calls fun() function to check the condition
+ * @brief manages "while" statements. Calls fun() function to check the
+ * condition
  */
 void gestione_while() {
 
-    if (split_line.size() == 2 && split_line[1].compare("false") == 0) { //se la clausola dell'if è FALSE
+    if (split_line.size() == 2 &&
+        split_line[1].compare("false") == 0) { // se la clausola dell'if è FALSE
         do {
-            find(); //cerco altre clausole che non devo conteggiare
+            find(); // cerco altre clausole che non devo conteggiare
         } while (line.compare("endwhile") != 0 && count_endwhile == 1);
         count_endwhile--;
 
-    } else if (split_line.size() == 2 && split_line[1].compare("true") == 0) { ct_loop = 9; }  //se la clausola dell'if è TRUE
+    } else if (split_line.size() == 2 && split_line[1].compare("true") == 0) {
+        ct_loop = 9;
+    } // se la clausola dell'if è TRUE
 
     else if (split_line[2].compare(">") == 0) {
         fun("endwhile",
-            3);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine while e il codice dell'operatore ">"
+            3); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // while e il codice dell'operatore ">"
     } else if (split_line[2].compare("<") == 0) {
         fun("endwhile",
-            4);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine while e il codice dell'operatore "<"
+            4); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // while e il codice dell'operatore "<"
     } else if (split_line[2].compare("<=") == 0) {
         fun("endwhile",
-            5);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine while e il codice dell'operatore "<="
+            5); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // while e il codice dell'operatore "<="
     } else if (split_line[2].compare(">=") == 0) {
         fun("endwhile",
-            6);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine while e il codice dell'operatore ">="
+            6); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // while e il codice dell'operatore ">="
     }
 }
-
 
 /**
  * @brief manages "if" statements. Calls fun() function to check the condition.
  */
 void gestione_if() {
 
-    if (split_line.size() == 2 && split_line[1].compare("false") == 0) { //se la clausola dell'if è FALSE
+    if (split_line.size() == 2 &&
+        split_line[1].compare("false") == 0) { // se la clausola dell'if è FALSE
         do {
-            find(); //cerco altre clausole che non devo conteggiare
+            find(); // cerco altre clausole che non devo conteggiare
         } while (line.compare("endif") != 0 && count_endif == 1);
         count_endif--;
-    } else if (split_line.size() == 2 && split_line[1].compare("true") == 0) {}  //se la clausola dell'if è TRUE
+    } else if (split_line.size() == 2 && split_line[1].compare("true") == 0) {
+    } // se la clausola dell'if è TRUE
 
     else if (split_line[2].compare(">") == 0) {
         fun("endif",
-            3);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine if e il codice dell'operatore ">"
+            3); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // if e il codice dell'operatore ">"
     } else if (split_line[2].compare("<") == 0) {
         fun("endif",
-            4);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine if e il codice dell'operatore "<"
+            4); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // if e il codice dell'operatore "<"
     } else if (split_line[2].compare("<=") == 0) {
         fun("endif",
-            5);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine if e il codice dell'operatore "<="
+            5); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // if e il codice dell'operatore "<="
     } else if (split_line[2].compare(">=") == 0) {
         fun("endif",
-            6);  //passo le posizioni 1 e 3 dei due valori, lo statement di fine if e il codice dell'operatore ">="
+            6); // passo le posizioni 1 e 3 dei due valori, lo statement di fine
+                // if e il codice dell'operatore ">="
     }
 }
 
-
 /**
- * @brief manages all types of assignment: simple assignment and complex assignment (with an operation in the right-hand).
+ * @brief manages all types of assignment: simple assignment and complex
+ * assignment (with an operation in the right-hand).
  */
 void gestione_assegnamento() {
 
-    if (split_line.size() > 3) {    //se ci sono operazioni nel lato dx dell'assegnamento
+    if (split_line.size() >
+        3) { // se ci sono operazioni nel lato dx dell'assegnamento
 
         if (!isdigit(split_line[2].at(0)) &&
-            split_line[2].at(0) != '-') {    //se viene fatto riferimento ad una variabile, ne prendo il valore
+            split_line[2].at(0) != '-') { // se viene fatto riferimento ad una
+                                          // variabile, ne prendo il valore
             value1 = assegnamenti.at(split_line[2]);
-            std::map<std::string, domain::FloatingPointAbstractInterval>::iterator it1, it2;
+            std::map<std::string,
+                     domain::FloatingPointAbstractInterval>::iterator it1,
+                it2;
             it1 = intervals_loop.find(split_line[2]);
             it2 = intervals_if.find(split_line[2]);
             if (count_endwhile > 0 && it1 != intervals_loop.end())
@@ -553,16 +589,20 @@ void gestione_assegnamento() {
                 interval1 = intervals_if.at(split_line[2]);
             else
                 interval1 = intervals.at(split_line[2]);
-        } else {    //se si fa riferimento ad un valore
-            value1 = stod1(split_line[2]);
-            interval1 = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[2])),
-                                                              domain::Bound(stod1(split_line[2])));
+        } else { // se si fa riferimento ad un valore
+            value1    = stod1(split_line[2]);
+            interval1 = domain::FloatingPointAbstractInterval(
+                domain::Bound(stod1(split_line[2])),
+                domain::Bound(stod1(split_line[2])));
         }
 
         if (!isdigit(split_line[4].at(0)) &&
-            split_line[4].at(0) != '-') {    //se viene fatto riferimento ad una variabile, ne prendo il valore
+            split_line[4].at(0) != '-') { // se viene fatto riferimento ad una
+                                          // variabile, ne prendo il valore
             value2 = assegnamenti.at(split_line[4]);
-            std::map<std::string, domain::FloatingPointAbstractInterval>::iterator it1, it2;
+            std::map<std::string,
+                     domain::FloatingPointAbstractInterval>::iterator it1,
+                it2;
             it1 = intervals_loop.find(split_line[4]);
             it2 = intervals_if.find(split_line[4]);
             if (count_endwhile > 0 && it1 != intervals_loop.end())
@@ -572,28 +612,36 @@ void gestione_assegnamento() {
             else
                 interval2 = intervals.at(split_line[4]);
 
-        } else {    //se si fa riferimento ad un valore
-            value2 = stod1(split_line[4]);
-            interval2 = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[4])),
-                                                              domain::Bound(stod1(split_line[4])));
+        } else { // se si fa riferimento ad un valore
+            value2    = stod1(split_line[4]);
+            interval2 = domain::FloatingPointAbstractInterval(
+                domain::Bound(stod1(split_line[4])),
+                domain::Bound(stod1(split_line[4])));
         }
 
         if (ct_loop == 0 && count_endif == 0)
-            intervals[split_line[0]] = calculator(value1, value2, split_line[3].at(0));
+            intervals[split_line[0]] =
+                calculator(value1, value2, split_line[3].at(0));
         else if (count_endif != 0)
-            intervals_if[split_line[0]] = calculator(value1, value2, split_line[3].at(0));
+            intervals_if[split_line[0]] =
+                calculator(value1, value2, split_line[3].at(0));
         else
-            intervals_loop[split_line[0]] = calculator(value1, value2, split_line[3].at(0));
+            intervals_loop[split_line[0]] =
+                calculator(value1, value2, split_line[3].at(0));
 
-    } else {                //se è un assegnamento
-        if (!isdigit(split_line[2].at(0)) && split_line[2].at(0) != '-') {    //se viene creato un alias
+    } else { // se è un assegnamento
+        if (!isdigit(split_line[2].at(0)) &&
+            split_line[2].at(0) != '-') { // se viene creato un alias
             assegnamenti[split_line[0]] = assegnamenti.at(split_line[2]);
 
-            std::map<std::string, domain::FloatingPointAbstractInterval>::iterator it1, it2;
+            std::map<std::string,
+                     domain::FloatingPointAbstractInterval>::iterator it1,
+                it2;
             it1 = intervals_loop.find(split_line[2]);
             it2 = intervals_if.find(split_line[2]);
             if (count_endwhile > 0 && it1 != intervals_loop.end())
-                intervals_loop[split_line[0]] = intervals_loop.at(split_line[2]);
+                intervals_loop[split_line[0]] =
+                    intervals_loop.at(split_line[2]);
             else if (count_endif > 0 && it2 != intervals_if.end())
                 intervals_if[split_line[0]] = intervals_if.at(split_line[2]);
             else if (count_endwhile > 0)
@@ -603,25 +651,30 @@ void gestione_assegnamento() {
             else
                 intervals[split_line[0]] = intervals.at(split_line[2]);
 
-        } else {    //se viene effettuato un assegnamento semplice
+        } else { // se viene effettuato un assegnamento semplice
             assegnamenti[split_line[0]] = stod1(split_line[2]);
             if (ct_loop == 0 && count_endif == 0)
-                intervals[split_line[0]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[2])),
-                                                                                 domain::Bound(stod1(split_line[2])));
+                intervals[split_line[0]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[2])),
+                        domain::Bound(stod1(split_line[2])));
             else if (count_endif != 0)
-                intervals_if[split_line[0]] = domain::FloatingPointAbstractInterval(domain::Bound(stod1(split_line[2])),
-                                                                                    domain::Bound(
-                                                                                            stod1(split_line[2])));
+                intervals_if[split_line[0]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[2])),
+                        domain::Bound(stod1(split_line[2])));
             else
-                intervals_loop[split_line[0]] = domain::FloatingPointAbstractInterval(
-                        domain::Bound(stod1(split_line[2])), domain::Bound(stod1(split_line[2])));
+                intervals_loop[split_line[0]] =
+                    domain::FloatingPointAbstractInterval(
+                        domain::Bound(stod1(split_line[2])),
+                        domain::Bound(stod1(split_line[2])));
         }
     }
 }
 
-
 /**
- * @brief read line-by-line the input.txt file. It identify and manage all kind of statement calling:
+ * @brief read line-by-line the input.txt file. It identify and manage all kind
+ * of statement calling:
  *  - gestione_assegnamento() to manage assignments;
  *  - gestione_if() to manage "if" statements;
  *  - gestione_while() to manage "while" statements.
@@ -632,17 +685,20 @@ void gestione_assegnamento() {
 int main() {
 
     bool fix = false;
-    in.open("input.txt");
+    in.open("../input.txt");
 
     while (!in.eof()) {
 
         if (count_endwhile == 0)
-            current_pos = in.tellg();   //prende la posizione fino alla riga precedente al primo while
+            current_pos = in.tellg(); // prende la posizione fino alla riga
+                                      // precedente al primo while
 
         getline(in, line);
         line = trim(line);
-        if (count_endwhile == 0 && count_endif == 0 && (line.find("while") != std::string::npos)) {
-            std::cout << "\nPROGRAM LINE: " << line << "  (loop n." << ct_loop + 1 << ")" << std::endl;
+        if (count_endwhile == 0 && count_endif == 0 &&
+            (line.find("while") != std::string::npos)) {
+            std::cout << "\nPROGRAM LINE: " << line << "  (loop n."
+                      << ct_loop + 1 << ")" << std::endl;
         } else
             std::cout << "\nPROGRAM LINE: " << line << std::endl;
 
@@ -653,10 +709,11 @@ int main() {
             if (split_line[0].compare("while") == 0) {
                 count_endwhile++;
                 ct_loop++;
-                if (fix){
-                    do {     // esco dal ciclo while
+                if (fix) {
+                    do { // esco dal ciclo while
                         find();
-                    } while (line.compare("endwhile") != 0 && count_endwhile == 1);
+                    } while (line.compare("endwhile") != 0 &&
+                             count_endwhile == 1);
                     ct_loop = 0;
                     intervals_loop.clear();
                     count_endwhile--;
@@ -666,16 +723,25 @@ int main() {
                     gestione_while();
 
                 if (ct_loop == 10) {
-                    for (it = intervals_loop.begin(); it != intervals_loop.end(); it++) {
-                        intervals.at(it->first) = intervals.at(it->first).widening(intervals_loop.at(it->first));
+                    for (it = intervals_loop.begin();
+                         it != intervals_loop.end();
+                         it++) {
+                        intervals.at(it->first) =
+                            intervals.at(it->first).widening(
+                                intervals_loop.at(it->first));
                     }
-                    if(loop_false)
-                        for (it = intervals.begin(); it != intervals.end(); it++)
-                            intervals.at(it->first) = intervals.at(it->first).lub(intervals.at(it->first), intervals_loop_false.at(it->first));
+                    if (loop_false)
+                        for (it = intervals.begin(); it != intervals.end();
+                             it++)
+                            intervals.at(it->first) =
+                                intervals.at(it->first).lub(
+                                    intervals.at(it->first),
+                                    intervals_loop_false.at(it->first));
                     loop_false = false;
-                    do {     // esco dal ciclo while
+                    do { // esco dal ciclo while
                         find();
-                    } while (line.compare("endwhile") != 0 && count_endwhile == 1);
+                    } while (line.compare("endwhile") != 0 &&
+                             count_endwhile == 1);
                     ct_loop = 0;
                     intervals_loop.clear();
                     count_endwhile--;
@@ -685,10 +751,12 @@ int main() {
                 gestione_if();
                 count_endif++;
 
-            } else if (split_line[1].compare("=") == 0) { //assegnamento
+            } else if (split_line[1].compare("=") == 0) { // assegnamento
                 if (isdigit(split_line[0].at(0)) &&
-                    split_line[0].at(0) != '-') {  //la variabile non può iniziare con un numero
-                    std::cerr << "\tVariable should not be a digit" << std::endl;
+                    split_line[0].at(0) !=
+                        '-') { // la variabile non può iniziare con un numero
+                    std::cerr << "\tVariable should not be a digit"
+                              << std::endl;
                     exit(1);
                 }
                 gestione_assegnamento();
@@ -696,11 +764,14 @@ int main() {
         } else if (line.compare("endif") == 0) {
             count_endif--;
             for (it = intervals_if.begin(); it != intervals_if.end(); it++) {
-                std::map<std::string, domain::FloatingPointAbstractInterval>::iterator it1;
+                std::map<std::string,
+                         domain::FloatingPointAbstractInterval>::iterator it1;
                 it1 = intervals.find(it->first);
                 if (it1 != intervals.end() && if_false)
-                    intervals.at(it->first) = intervals_if_false.at(it->first).lub(intervals_if.at(it->first),
-                                                                          intervals_if_false.at(it->first));
+                    intervals.at(it->first) =
+                        intervals_if_false.at(it->first).lub(
+                            intervals_if.at(it->first),
+                            intervals_if_false.at(it->first));
                 else
                     intervals[it->first] = it->second;
             }
@@ -708,22 +779,27 @@ int main() {
         } else if (line.compare("endwhile") == 0 && count_endwhile != 0) {
             count_endwhile--;
             if (ct_loop > 0 && ct_loop < 9) {
-                for (it = intervals_loop.begin(); it != intervals_loop.end(); it++) {
-                    std::map<std::string, domain::FloatingPointAbstractInterval>::iterator it1;
+                for (it = intervals_loop.begin(); it != intervals_loop.end();
+                     it++) {
+                    std::map<std::string,
+                             domain::FloatingPointAbstractInterval>::iterator
+                        it1;
                     it1 = intervals.find(it->first);
                     if (it1 != intervals.end())
-                        intervals.at(it->first) = intervals_loop.at(it->first).lub(intervals_loop.at(it->first),
-                                                                              intervals.at(it->first));
+                        intervals.at(it->first) =
+                            intervals_loop.at(it->first).lub(
+                                intervals_loop.at(it->first),
+                                intervals.at(it->first));
                     else
                         intervals[it->first] = it->second;
-
                 }
 
-                if (fix_supp.operator==(intervals[fix_var]))
+                if (fix_supp == intervals[fix_var])
                     fix = true;
             }
 
-            in.seekg(current_pos);  //riposizionamento del cursore nella riga del while
+            in.seekg(current_pos); // riposizionamento del cursore nella riga
+                                   // del while
         }
 
         // Stampa a video degli intervalli corrispondenti alle variabili
@@ -731,20 +807,32 @@ int main() {
             for (it = intervals.begin(); it != intervals.end(); it++) {
                 printf("%s:\t", it->first.c_str());
                 if (intervals.at(it->first).getLowerBound().is_infinity()) {
-                    if (intervals.at(it->first).getLowerBound().getInfinityValue().getSign() == 0)
+                    if (intervals.at(it->first)
+                            .getLowerBound()
+                            .getInfinityValue()
+                            .getSign() == 0)
                         printf("[ -inf; ");
                     else
                         printf("[ +inf; ");
                 } else
-                    printf("[ %.2f; ", intervals.at(it->first).getLowerBound().getFloatValue());
+                    printf("[ %.2f; ",
+                           intervals.at(it->first)
+                               .getLowerBound()
+                               .getFloatValue());
 
                 if (intervals.at(it->first).getUpperBound().is_infinity()) {
-                    if (intervals.at(it->first).getUpperBound().getInfinityValue().getSign() == 0)
+                    if (intervals.at(it->first)
+                            .getUpperBound()
+                            .getInfinityValue()
+                            .getSign() == 0)
                         printf("-inf ]\n");
                     else
                         printf("+inf ]\n");
                 } else
-                    printf("%.2f ]\n", intervals.at(it->first).getUpperBound().getFloatValue());
+                    printf("%.2f ]\n",
+                           intervals.at(it->first)
+                               .getUpperBound()
+                               .getFloatValue());
             }
             std::cout << "" << std::endl;
         }
@@ -756,29 +844,40 @@ int main() {
     }
 
     if (count_endwhile != 0) {
-        std::cerr << "\tError: uncorrect use of \"endwhile\" keyword" << std::endl;
+        std::cerr << "\tError: uncorrect use of \"endwhile\" keyword"
+                  << std::endl;
         exit(1);
     }
 
     // Stampa a video degli intervalli corrispondenti alle variabili
-    std::cout << "\n\nAt the end of the program, intervals corresponding to variables are:" << std::endl;
+    std::cout << "\n\nAt the end of the program, intervals corresponding to "
+                 "variables are:"
+              << std::endl;
     for (it = intervals.begin(); it != intervals.end(); it++) {
         printf("%s:\t", it->first.c_str());
         if (intervals.at(it->first).getLowerBound().is_infinity()) {
-            if (intervals.at(it->first).getLowerBound().getInfinityValue().getSign() == 0)
+            if (intervals.at(it->first)
+                    .getLowerBound()
+                    .getInfinityValue()
+                    .getSign() == 0)
                 printf("[ -inf; ");
             else
                 printf("[ +inf; ");
         } else
-            printf("[ %.2f; ", intervals.at(it->first).getLowerBound().getFloatValue());
+            printf("[ %.2f; ",
+                   intervals.at(it->first).getLowerBound().getFloatValue());
 
         if (intervals.at(it->first).getUpperBound().is_infinity()) {
-            if (intervals.at(it->first).getUpperBound().getInfinityValue().getSign() == 0)
+            if (intervals.at(it->first)
+                    .getUpperBound()
+                    .getInfinityValue()
+                    .getSign() == 0)
                 printf("-inf ]\n");
             else
                 printf("+inf ]\n");
         } else
-            printf("%.2f ]\n", intervals.at(it->first).getUpperBound().getFloatValue());
+            printf("%.2f ]\n",
+                   intervals.at(it->first).getUpperBound().getFloatValue());
     }
     std::cout << "" << std::endl;
 

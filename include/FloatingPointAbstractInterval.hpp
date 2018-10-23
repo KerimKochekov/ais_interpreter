@@ -1,11 +1,8 @@
 /**
  * @authors Marco Colognese, Mattia Rossini
  * @version v1.0
- * @date September, 2018
+ * @date October, 2018
  */
-
-#ifndef CPP_PROJECT_FLOATINGPOINTABSTRACTINTERVAL_HPP
-#define CPP_PROJECT_FLOATINGPOINTABSTRACTINTERVAL_HPP
 
 #pragma once
 #include "AbstractInterval.hpp"
@@ -38,11 +35,6 @@ public:
     FloatingPointAbstractInterval() = default;
 
     /**
-     * @brief Destructor for FloatingPointAbstractInterval class
-     */
-    ~FloatingPointAbstractInterval() override = default;
-
-    /**
      * @brief Controls if the current float interval contains just finite
      * bounds.
      *
@@ -56,20 +48,26 @@ public:
      * The result of a sum [l1, u1] + [l2, u2] is the interval [l1 + l2, u1
      * + u2].
      *
-     * @param i the float interval to be added to the current interval
+     * @param i the first float interval
+     * @param ii the second float interval
      * @return the resulting float interval
      */
-    FloatingPointAbstractInterval operator+(FloatingPointAbstractInterval& i);
+    friend FloatingPointAbstractInterval
+    operator+(const FloatingPointAbstractInterval& i,
+              const FloatingPointAbstractInterval& ii);
 
     /**
      * @brief Performs the subtraction operation on two float intervals.
      * The result of the subtraction [l1; u1] - [l2; u2] is the interval [l1
      * - u2; u1 - l2].
      *
-     * @param i the float interval to be subtracted from the current interval
+     * @param i the first float interval
+     * @param ii the second float interval
      * @return the resulting interval
      */
-    FloatingPointAbstractInterval operator-(FloatingPointAbstractInterval& i);
+    friend FloatingPointAbstractInterval
+    operator-(const FloatingPointAbstractInterval& i,
+              const FloatingPointAbstractInterval& ii);
 
     /**
      * @brief Performs the multiplication operation on two float intervals.
@@ -77,10 +75,13 @@ public:
      * b] such that: a = min{l1 * l2, l1 * u2, u1 * l2, u1 * u2} and b =
      * max{l1 * l2, l1 * u2, u1 * l2, u1 * u2}.
      *
-     * @param i the float interval to be multiplied per this
+     * @param i the first float interval
+     * @param ii the second float interval
      * @return a new interval containing the multiplication result
      */
-    FloatingPointAbstractInterval operator*(FloatingPointAbstractInterval& i);
+    friend FloatingPointAbstractInterval
+    operator*(const FloatingPointAbstractInterval& i,
+              const FloatingPointAbstractInterval& ii);
 
     /**
      * @brief Performs the division on this float interval.
@@ -91,20 +92,25 @@ public:
      * If 0 is contained in the divider interval, the interval [-inf, +inf]
      * is returned.
      *
-     * @param i the divider float interval
+     * @param i the first float interval
+     * @param ii the second float interval
      * @return the resulting interval
      */
-    FloatingPointAbstractInterval operator/(FloatingPointAbstractInterval& i);
+    friend FloatingPointAbstractInterval
+    operator/(const FloatingPointAbstractInterval& i,
+              const FloatingPointAbstractInterval& ii);
 
     /**
      * @brief Returns the float interval resulting from the equality operator.
      * The resulting interval on is [1,1] if l1 = l2 = u1 = u2,
      * [0,0] if u1 < l2 or u2 < l1, [0,1] otherwise.
      *
-     * @param i the float interval compared to this interval
+     * @param i the first float interval
+     * @param ii the second float interval
      * @return the resulting interval
      */
-    bool operator==(FloatingPointAbstractInterval& i);
+    friend bool operator==(const FloatingPointAbstractInterval& i,
+                           const FloatingPointAbstractInterval& ii);
 
     /**
      * @brief Performs the least upper bound on two float intervals.
@@ -113,8 +119,8 @@ public:
      * @param ii the second float interval
      * @return the least upper bound of the given float intervals
      */
-    FloatingPointAbstractInterval lub(FloatingPointAbstractInterval& i,
-                                      FloatingPointAbstractInterval& ii);
+    FloatingPointAbstractInterval lub(const FloatingPointAbstractInterval& i,
+                                      const FloatingPointAbstractInterval& ii);
 
     /**
      * @brief Controls if the float interval intersects this float interval.
@@ -123,7 +129,7 @@ public:
      * @return 'true' if the first interval intersects this interval,
      * 'false' otherwise
      */
-    bool intersects(AbstractInterval& i) override;
+    bool intersects(const AbstractInterval& i) override;
 
     /**
      * @brief Computes the width of the current float interval.
@@ -151,7 +157,8 @@ public:
      * @param i the second float interval
      * @return the resulting float interval
      */
-    FloatingPointAbstractInterval widening(FloatingPointAbstractInterval& i);
+    FloatingPointAbstractInterval
+    widening(const FloatingPointAbstractInterval& i);
 
     /**
      * @brief Performs the narrowing operator on two float intervals.
@@ -167,7 +174,8 @@ public:
      * @param i the second float interval
      * @return the resulting float interval
      */
-    FloatingPointAbstractInterval narrowing(FloatingPointAbstractInterval& i);
+    FloatingPointAbstractInterval
+    narrowing(const FloatingPointAbstractInterval& i);
 
 protected:
     /**
@@ -179,8 +187,6 @@ protected:
      * @return true if first interval is contained in the second interval,
      * false otherwise.
      */
-    bool isContainedIn(AbstractInterval& i) override;
+    bool isContainedIn(const AbstractInterval& i) override;
 };
 } // namespace domain
-
-#endif // CPP_PROJECT_FLOATINGPOINTABSTRACTINTERVAL_HPP

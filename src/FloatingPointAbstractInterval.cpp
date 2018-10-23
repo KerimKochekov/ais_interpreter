@@ -1,44 +1,49 @@
-#include "../include/FloatingPointAbstractInterval.hpp"
-#include "../include/AbstractInterval.hpp"
-#include "../include/Bound.hpp"
-#include "../include/Infinity.hpp"
-#include "../include/UndefinedOperationException.hpp"
+#include "FloatingPointAbstractInterval.hpp"
+#include "AbstractInterval.hpp"
+#include "Bound.hpp"
+#include "Infinity.hpp"
+#include "UndefinedOperationException.hpp"
 
-bool domain::FloatingPointAbstractInterval::isFinite() {
+namespace domain {
+
+bool FloatingPointAbstractInterval::isFinite() {
     return !(getLowerBound().is_infinity() || getUpperBound().is_infinity());
 }
 
-domain::FloatingPointAbstractInterval domain::FloatingPointAbstractInterval::
-                                      operator+(FloatingPointAbstractInterval& i) {
-    FloatingPointAbstractInterval ii(i.getLowerBound(), i.getUpperBound());
+FloatingPointAbstractInterval
+operator+(const FloatingPointAbstractInterval& i,
+          const FloatingPointAbstractInterval& ii) {
+    FloatingPointAbstractInterval iii(ii.getLowerBound(), ii.getUpperBound());
     Bound                         l, u;
-    l = getLowerBound() + ii.getLowerBound();
-    u = getUpperBound() + ii.getUpperBound();
+    l = i.getLowerBound() + iii.getLowerBound();
+    u = i.getUpperBound() + iii.getUpperBound();
 
     return FloatingPointAbstractInterval(l, u);
 }
 
-domain::FloatingPointAbstractInterval domain::FloatingPointAbstractInterval::
-                                      operator-(FloatingPointAbstractInterval& i) {
-    FloatingPointAbstractInterval ii(i.getLowerBound(), i.getUpperBound());
+FloatingPointAbstractInterval
+operator-(const FloatingPointAbstractInterval& i,
+          const FloatingPointAbstractInterval& ii) {
+    FloatingPointAbstractInterval iii(ii.getLowerBound(), ii.getUpperBound());
     Bound                         l, u;
-    l = ii.getUpperBound().revertSign() + getLowerBound();
-    u = ii.getLowerBound().revertSign() + getUpperBound();
+    l = iii.getUpperBound().revertSign() + i.getLowerBound();
+    u = iii.getLowerBound().revertSign() + i.getUpperBound();
 
     return FloatingPointAbstractInterval(l, u);
 }
 
-domain::FloatingPointAbstractInterval domain::FloatingPointAbstractInterval::
-                                      operator*(FloatingPointAbstractInterval& i) {
+FloatingPointAbstractInterval
+operator*(const FloatingPointAbstractInterval& i,
+          const FloatingPointAbstractInterval& ii) {
     Bound l, u, l1, u1, l2, u2;
 
-    l1 = getLowerBound();
-    u1 = getUpperBound();
-    l2 = i.getLowerBound();
-    u2 = i.getUpperBound();
+    l1         = i.getLowerBound();
+    u1         = i.getUpperBound();
+    l2         = ii.getLowerBound();
+    u2         = ii.getUpperBound();
     Bound* val = new Bound[4]{ l1 * l2, l1 * u2, l2 * u1, u1 * u2 };
-    l = val[0];
-    u = l;
+    l          = val[0];
+    u          = l;
 
     for (int k = 0; k < 4; k++) {
         if (val[k] < l)
@@ -51,17 +56,18 @@ domain::FloatingPointAbstractInterval domain::FloatingPointAbstractInterval::
     return FloatingPointAbstractInterval(l, u);
 }
 
-domain::FloatingPointAbstractInterval domain::FloatingPointAbstractInterval::
-                                      operator/(FloatingPointAbstractInterval& i) {
+FloatingPointAbstractInterval
+operator/(const FloatingPointAbstractInterval& i,
+          const FloatingPointAbstractInterval& ii) {
     Bound l, u, l1, u1, l2, u2;
 
-    l1 = getLowerBound();
-    u1 = getUpperBound();
-    l2 = i.getLowerBound();
-    u2 = i.getUpperBound();
+    l1         = i.getLowerBound();
+    u1         = i.getUpperBound();
+    l2         = ii.getLowerBound();
+    u2         = ii.getUpperBound();
     Bound* val = new Bound[4]{ l1 / l2, l1 / u2, l2 / u1, u1 / u2 };
-    l = val[0];
-    u = l;
+    l          = val[0];
+    u          = l;
 
     for (int j = 0; j < 4; j++) {
         if (val[j] < l)
@@ -75,15 +81,15 @@ domain::FloatingPointAbstractInterval domain::FloatingPointAbstractInterval::
     return FloatingPointAbstractInterval(l, u);
 }
 
-bool domain::FloatingPointAbstractInterval::
-     operator==(FloatingPointAbstractInterval& i) {
-    return getUpperBound() == i.getUpperBound() &&
-           getLowerBound() == i.getLowerBound();
+bool operator==(const FloatingPointAbstractInterval& i,
+                const FloatingPointAbstractInterval& ii) {
+    return i.getUpperBound() == ii.getUpperBound() &&
+           i.getLowerBound() == ii.getLowerBound();
 }
 
-domain::FloatingPointAbstractInterval
-domain::FloatingPointAbstractInterval::lub(FloatingPointAbstractInterval& i,
-                                           FloatingPointAbstractInterval& ii) {
+FloatingPointAbstractInterval
+FloatingPointAbstractInterval::lub(const FloatingPointAbstractInterval& i,
+                                   const FloatingPointAbstractInterval& ii) {
     Bound lLub, uLub;
 
     if (i.getLowerBound() < ii.getLowerBound())
@@ -99,20 +105,19 @@ domain::FloatingPointAbstractInterval::lub(FloatingPointAbstractInterval& i,
     return FloatingPointAbstractInterval(lLub, uLub);
 }
 
-bool domain::FloatingPointAbstractInterval::intersects(AbstractInterval& i) {
+bool FloatingPointAbstractInterval::intersects(const AbstractInterval& i) {
     return !((i.getUpperBound() < getLowerBound()) ^
              !(i.getLowerBound() <= getUpperBound()));
 }
 
-domain::Bound domain::FloatingPointAbstractInterval::width() {
+Bound FloatingPointAbstractInterval::width() {
     if (getUpperBound().is_infinity() || getLowerBound().is_infinity()) {
         return Bound(Infinity('+'));
     }
     return Bound(getUpperBound() - getLowerBound() + Bound(1));
 }
 
-domain::FloatingPointAbstractInterval
-domain::FloatingPointAbstractInterval::negate() {
+FloatingPointAbstractInterval FloatingPointAbstractInterval::negate() {
     Bound l, u;
 
     u = getLowerBound().revertSign();
@@ -121,9 +126,8 @@ domain::FloatingPointAbstractInterval::negate() {
     return FloatingPointAbstractInterval(l, u);
 }
 
-domain::FloatingPointAbstractInterval
-domain::FloatingPointAbstractInterval::widening(
-    FloatingPointAbstractInterval& i) {
+FloatingPointAbstractInterval FloatingPointAbstractInterval::widening(
+    const FloatingPointAbstractInterval& i) {
     Bound l, u;
 
     if (i.getLowerBound() < getLowerBound()) {
@@ -141,9 +145,8 @@ domain::FloatingPointAbstractInterval::widening(
     return FloatingPointAbstractInterval(l, u);
 }
 
-domain::FloatingPointAbstractInterval
-domain::FloatingPointAbstractInterval::narrowing(
-    FloatingPointAbstractInterval& i) {
+FloatingPointAbstractInterval FloatingPointAbstractInterval::narrowing(
+    const FloatingPointAbstractInterval& i) {
     FloatingPointAbstractInterval res = FloatingPointAbstractInterval();
     if (getLowerBound() == Bound(Infinity('-'))) {
         res.setLowerBound(i.getLowerBound());
@@ -160,7 +163,8 @@ domain::FloatingPointAbstractInterval::narrowing(
     return res;
 }
 
-bool domain::FloatingPointAbstractInterval::isContainedIn(AbstractInterval& i) {
+bool FloatingPointAbstractInterval::isContainedIn(const AbstractInterval& i) {
     return getLowerBound() >= i.getLowerBound() &&
            getUpperBound() <= i.getUpperBound();
 }
+} // namespace domain

@@ -2,9 +2,11 @@
 
 * Marco Colognese
     - VR423791
+    - id894jvf
 
 * Mattia Rossini
     - VR423614
+    - id594wuv
 
 
 
@@ -73,7 +75,7 @@
 
 * `Intepreter`:
     - utilizzo del container map
-    - utilizzo di un iteraor per scorrere gli elementi della map
+    - utilizzo di un iterator per scorrere gli elementi della map
     - lettura dal file `input.txt`
     - utilizzo pratico della libreria implementata per l'analisi di un programma
 
@@ -82,4 +84,4 @@
     - costruttori marcati `explicit`
     - libreria `catch2` per il testing
     - metodi marcati `const`
-    - Doxygen per la documentazione# ais_interpreter
+    - Doxygen per la documentazione

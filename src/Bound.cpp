@@ -1,132 +1,133 @@
-#include "../include/Bound.hpp"
-#include "../include/Infinity.hpp"
-#include "../include/UndefinedOperationException.hpp"
+#include "Bound.hpp"
+#include "Infinity.hpp"
+#include "UndefinedOperationException.hpp"
 
-bool domain::Bound::is_infinity() const {
+namespace domain {
+
+bool Bound::is_infinity() const {
     return value_type == 0;
 }
 
-bool domain::Bound::is_integer() const {
+bool Bound::is_integer() const {
     return value_type == 1;
 }
 
-bool domain::Bound::is_float() const {
+bool Bound::is_float() const {
     return value_type == 2;
 }
 
-domain::Bound::Bound() = default;
-
-domain::Bound domain::Bound::operator+(domain::Bound b) {
+Bound operator+(const Bound& a, const Bound& b) {
     if (b.is_infinity()) {
-        if (is_infinity())
-            return Bound(i + b.i);
-        else if (is_float())
-            return Bound(b.i + float_value);
+        if (a.is_infinity())
+            return Bound(b.getInfinityValue() + a.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() + b.getInfinityValue());
         else
-            return Bound(b.i + int_value);
+            return Bound(a.getIntValue() + b.getInfinityValue());
     } else if (b.is_float()) {
 
-        if (is_infinity())
-            return Bound(i + b.float_value);
-        else if (is_float())
-            return Bound(float_value + b.float_value);
+        if (a.is_infinity())
+            return Bound(b.getFloatValue() + a.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() + b.getFloatValue());
         else
 
-            return Bound(int_value + b.float_value);
+            return Bound(a.getIntValue() + b.getFloatValue());
     } else {
-        if (is_infinity())
-            return Bound(i + b.int_value);
-        else if (is_float())
-            return Bound(float_value + b.int_value);
+        if (a.is_infinity())
+            return Bound(b.getIntValue() + a.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() + b.getIntValue());
         else
-            return Bound(int_value + b.int_value);
+            return Bound(a.getIntValue() + b.getIntValue());
     }
 }
 
-domain::Bound domain::Bound::operator-(domain::Bound b) {
+Bound operator-(const Bound& a, const Bound& b) {
     if (b.is_infinity()) {
-        if (is_infinity())
-            if (getInfinityValue().getSign() != b.getInfinityValue().getSign())
-                return Bound(i);
+        if (a.is_infinity())
+            if (a.getInfinityValue().getSign() !=
+                b.getInfinityValue().getSign())
+                return Bound(a.getInfinityValue());
             else
                 throw exceptions::UndefinedOperationException();
-        else if (is_float())
-            return Bound(float_value - b.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() - b.getInfinityValue());
         else
-            return Bound(int_value - b.getInfinityValue());
+            return Bound(a.getIntValue() - b.getInfinityValue());
     } else if (b.is_float()) {
 
-        if (is_infinity())
-            return Bound(i - b.float_value);
-        else if (is_float())
-            return Bound(float_value - b.float_value);
+        if (a.is_infinity())
+            return Bound(-b.getFloatValue() + a.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() - b.getFloatValue());
         else
-            return Bound(int_value - b.float_value);
+            return Bound(a.getIntValue() - b.getFloatValue());
     } else {
-        if (is_infinity())
-            return Bound(i - b.int_value);
-        else if (is_float())
-            return Bound(float_value - b.int_value);
+        if (a.is_infinity())
+            return Bound(-b.getIntValue() + a.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() - b.getIntValue());
         else
-            return Bound(int_value - b.int_value);
+            return Bound(a.getIntValue() - b.getIntValue());
     }
 }
 
-domain::Bound domain::Bound::operator*(domain::Bound b) {
+Bound operator*(const Bound& a, const Bound& b) {
     if (b.is_infinity()) {
-        if (is_infinity())
-            return Bound(i * b.i);
-        else if (is_float())
-            return Bound(b.i * float_value);
+        if (a.is_infinity())
+            return Bound(a.getInfinityValue() * b.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() * b.getInfinityValue());
         else
-            return Bound(b.i * int_value);
+            return Bound(a.getIntValue() * b.getInfinityValue());
     } else if (b.is_float()) {
-        if (is_infinity())
-            return Bound(i * b.float_value);
-        else if (is_float())
-            return Bound(float_value * b.float_value);
+        if (a.is_infinity())
+            return Bound(b.getFloatValue() * a.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() * b.getFloatValue());
         else
-            return Bound(int_value * b.float_value);
+            return Bound(a.getIntValue() * b.getFloatValue());
     } else {
-        if (is_infinity())
-            return Bound(i * b.int_value);
-        else if (is_float())
-            return Bound(float_value * b.int_value);
+        if (a.is_infinity())
+            return Bound(b.getIntValue() * a.getInfinityValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() * b.getIntValue());
         else
-            return Bound(int_value * b.int_value);
+            return Bound(a.getIntValue() * b.getIntValue());
     }
 }
 
-domain::Bound domain::Bound::operator/(domain::Bound b) {
+Bound operator/(Bound& a, Bound& b) {
     if (b.is_infinity()) {
-        if (is_infinity())
+        if (a.is_infinity())
             throw exceptions::UndefinedOperationException();
-        else if (is_float())
-            return Bound(float_value / b.i);
+        else if (a.is_float())
+            return Bound(a.getFloatValue() / b.getIntValue());
         else
-            return Bound(int_value / b.i);
+            return Bound(0);
     } else if (b.is_float()) {
         if (b.getFloatValue() == 0.0)
             throw exceptions::UndefinedOperationException();
-        if (is_infinity())
-            return Bound(i / b.float_value);
-        else if (is_float())
-            return Bound(float_value / b.float_value);
+        if (a.is_infinity())
+            return Bound(a.getInfinityValue() / b.getFloatValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() / b.getFloatValue());
         else
-            return Bound(int_value / b.float_value);
+            return Bound(a.getIntValue() / b.getFloatValue());
     } else {
         if (b.getIntValue() == 0)
             throw exceptions::UndefinedOperationException();
-        if (is_infinity())
-            return Bound(i / b.int_value);
-        else if (is_float())
-            return Bound(float_value / b.int_value);
+        if (a.is_infinity())
+            return Bound(a.getInfinityValue() / b.getIntValue());
+        else if (a.is_float())
+            return Bound(a.getFloatValue() / b.getIntValue());
         else
-            return Bound(int_value / b.int_value);
+            return Bound(a.getIntValue() / b.getIntValue());
     }
 }
 
-domain::Bound domain::Bound::revertSign() {
+Bound Bound::revertSign() {
     if (is_infinity()) {
         Infinity inf = i;
         if (inf.isPositive())
@@ -140,122 +141,122 @@ domain::Bound domain::Bound::revertSign() {
     return Bound(-(float_value));
 }
 
-bool domain::Bound::operator<(domain::Bound b) {
-    if (is_infinity()) {
+bool operator<(const Bound& a, const Bound& b) {
+    if (a.is_infinity()) {
         if (b.is_infinity())
-            return i < b.i;
+            return b.getInfinityValue() > a.getInfinityValue();
         else if (b.is_float())
-            return i < b.float_value;
+            return b.getFloatValue() > a.getInfinityValue();
         else
-            return i < b.int_value;
-    } else if (is_float()) {
+            return b.getIntValue() > a.getInfinityValue();
+    } else if (a.is_float()) {
         if (b.is_infinity())
-            return float_value < b.i;
+            return a.getFloatValue() < b.getInfinityValue();
         else if (b.is_integer())
-            return float_value < b.int_value;
+            return a.getFloatValue() < b.getIntValue();
         else
-            return float_value < b.float_value;
+            return a.getFloatValue() < b.getFloatValue();
     } else {
         if (b.is_infinity())
-            return int_value < b.i;
+            return a.getIntValue() < b.getInfinityValue();
         else if (b.is_integer())
-            return int_value < b.int_value;
+            return a.getIntValue() < b.getIntValue();
         else
-            return int_value < b.float_value;
+            return a.getIntValue() < b.getFloatValue();
     }
 }
 
-bool domain::Bound::operator<=(domain::Bound b) {
-    if (is_infinity()) {
+bool operator<=(const Bound& a, const Bound& b) {
+    if (a.is_infinity()) {
         if (b.is_infinity())
-            return i <= b.i;
+            return b.getInfinityValue() >= a.getInfinityValue();
         else if (b.is_float())
-            return i <= b.float_value;
+            return b.getFloatValue() >= a.getInfinityValue();
         else
-            return i <= b.int_value;
-    } else if (is_float()) {
+            return b.getIntValue() >= a.getInfinityValue();
+    } else if (a.is_float()) {
         if (b.is_infinity())
-            return float_value <= b.i;
+            return a.getFloatValue() <= b.getInfinityValue();
         else if (b.is_integer())
-            return float_value <= b.int_value;
+            return a.getFloatValue() <= b.getIntValue();
         else
-            return float_value <= b.float_value;
+            return a.getFloatValue() <= b.getFloatValue();
     } else {
         if (b.is_infinity())
-            return int_value <= b.i;
+            return a.getIntValue() <= b.getInfinityValue();
         else if (b.is_integer())
-            return int_value <= b.int_value;
+            return a.getIntValue() <= b.getIntValue();
         else
-            return int_value <= b.float_value;
+            return a.getIntValue() <= b.getFloatValue();
     }
 }
 
-bool domain::Bound::operator>(domain::Bound b) {
-    if (is_infinity()) {
+bool operator>(const Bound& a, const Bound& b) {
+    if (a.is_infinity()) {
         if (b.is_infinity())
-            return i > b.i;
+            return b.getInfinityValue() < a.getInfinityValue();
         else if (b.is_float())
-            return i > b.float_value;
+            return b.getFloatValue() < a.getInfinityValue();
         else
-            return i > b.int_value;
-    } else if (is_float()) {
+            return b.getIntValue() < a.getInfinityValue();
+    } else if (a.is_float()) {
         if (b.is_infinity())
-            return float_value > b.i;
+            return a.getFloatValue() > b.getInfinityValue();
         else if (b.is_integer())
-            return float_value > b.int_value;
+            return a.getFloatValue() > b.getIntValue();
         else
-            return float_value > b.float_value;
+            return a.getFloatValue() > b.getFloatValue();
     } else {
         if (b.is_infinity())
-            return int_value > b.i;
+            return a.getIntValue() > b.getInfinityValue();
         else if (b.is_integer())
-            return int_value > b.int_value;
+            return a.getIntValue() > b.getIntValue();
         else
-            return int_value > b.float_value;
+            return a.getIntValue() > b.getFloatValue();
     }
 }
 
-bool domain::Bound::operator>=(domain::Bound b) {
-    if (is_infinity()) {
+bool operator>=(const Bound& a, const Bound& b) {
+    if (a.is_infinity()) {
         if (b.is_infinity())
-            return i >= b.i;
+            return b.getInfinityValue() <= a.getInfinityValue();
         else if (b.is_float())
-            return i >= b.float_value;
+            return b.getFloatValue() <= a.getInfinityValue();
         else
-            return i >= b.int_value;
-    } else if (is_float()) {
+            return b.getIntValue() <= a.getInfinityValue();
+    } else if (a.is_float()) {
         if (b.is_infinity())
-            return float_value >= b.i;
+            return a.getFloatValue() >= b.getInfinityValue();
         else if (b.is_integer())
-            return float_value >= b.int_value;
+            return a.getFloatValue() >= b.getIntValue();
         else
-            return float_value >= b.float_value;
+            return a.getFloatValue() >= b.getFloatValue();
     } else {
         if (b.is_infinity())
-            return int_value >= b.i;
+            return a.getIntValue() >= b.getIntValue();
         else if (b.is_integer())
-            return int_value >= b.int_value;
+            return a.getIntValue() >= b.getIntValue();
         else
-            return int_value >= b.float_value;
+            return a.getIntValue() >= b.getFloatValue();
     }
 }
 
-domain::Bound::Bound(domain::Infinity infinity) {
+Bound::Bound(const Infinity& infinity) {
     i          = infinity;
     value_type = 0;
 }
 
-domain::Bound::Bound(int value) {
+Bound::Bound(int value) {
     int_value  = value;
     value_type = 1;
 }
 
-domain::Bound::Bound(double value) {
+Bound::Bound(double value) {
     float_value = value;
     value_type  = 2;
 }
 
-template<typename L> L domain::Bound::getValue() {
+template<typename L> L Bound::getValue() {
     if (value_type == 0)
         return i;
     else if (value_type == 1)
@@ -264,19 +265,19 @@ template<typename L> L domain::Bound::getValue() {
         return float_value;
 }
 
-int domain::Bound::getIntValue() const {
+int Bound::getIntValue() const {
     return int_value;
 }
 
-double domain::Bound::getFloatValue() const {
+double Bound::getFloatValue() const {
     return float_value;
 }
 
-domain::Infinity domain::Bound::getInfinityValue() const {
+Infinity Bound::getInfinityValue() const {
     return i;
 }
 
-bool domain::operator==(domain::Bound const& a, domain::Bound const& b) {
+bool operator==(const Bound& a, const Bound& b) {
     if (a.value_type == 1 && b.value_type == 2)
         return a.getIntValue() == b.getFloatValue();
     else if (a.value_type == 2 && b.value_type == 1)
@@ -291,6 +292,18 @@ bool domain::operator==(domain::Bound const& a, domain::Bound const& b) {
         return false;
 }
 
-bool operator!=(const domain::Bound& a, const domain::Bound& b) {
-    return !(a == b);
+bool operator!=(const Bound& a, const Bound& b) {
+    if (a.value_type == 1 && b.value_type == 2)
+        return !(a.getIntValue() == b.getFloatValue());
+    else if (a.value_type == 2 && b.value_type == 1)
+        return !(a.getFloatValue() == b.getIntValue());
+    else if (a.value_type == 0 && b.value_type == 0)
+        return !(a.getInfinityValue() == b.getInfinityValue());
+    else if (a.value_type == 1 && b.value_type == 1)
+        return !(a.getIntValue() == b.getIntValue());
+    else if (a.value_type == 2 && b.value_type == 2)
+        return !((float) a.getFloatValue() == (float) b.getFloatValue());
+    else
+        return false;
 }
+} // namespace domain
