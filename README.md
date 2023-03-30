@@ -1,87 +1,75 @@
-## Studenti ##
+## Compiling/starting from /build ##
 
-* Marco Colognese
-    - VR423791
-    - id894jvf
+* Compiling `CMakeLists.txt` via `cmake .` command
 
-* Mattia Rossini
-    - VR423614
-    - id594wuv
+* Compiling the source code via the `make` command
 
+* Starting tests with the `make test` command
 
+* Generation of documentation via the `make doc` command which also includes a general description of the project in the `index.html` file
 
-## Compilazione/avvio da /build ##
+* Starting the valgrind tool with the `make valgrind` command
 
-* Compilazione `CMakeLists.txt` attraverso il comando `cmake .`
-
-* Compilazione del codice sorgente attraverso il comando `make`
-
-* Avvio dei test attraverso il comando `make test`
-
-* Generazione della documentazione attraverso il comando `make doc` che comprende anche una descrizione genarale del progetto nel file `index.html`
-
-* Avvio del tool valgrind attraverso il comando `make valgrind`
-
-* Avvio dell'interprete attraverso il comando `./Interpreter`
+* Starting the interpreter with the `./Interpreter` command
 
 
 
-## Cosa include il progetto ##
+## What the project includes ##
 
 * `CMakeLists.txt`
-    - compilazione con warning
-    - modalita' RELEASE e DEBUG
-    - valgrind (`make valgrind`)
-    - test (`make test`)
-    - clean (`make clean`)
-    - doc (`make doc`)
+     - compilation with warnings
+     - RELEASE and DEBUG mode
+     - valgrind (`make valgrind`)
+     - test (`make test`)
+     - clean (`make clean`)
+     -doc (`make doc`)
 
 * `AbstractInterval` Class:
-    - specializzazione nel file .cpp
-    - classe astratta
-    - classe polimorfica
-    - metodi virtual
-    - metodi final
-    - metodi const
+     - specialization in the .cpp file
+     - abstract class
+     - polymorphic class
+     - virtual methods
+     - final methods
+     - methods const
 
 * `Bound` Class:
-    - specializzazione nel file .cpp
-    - metodo con template
-    - metodi const
-    - overloading costruttore
-    - override `operator+` `operator-` `operator*` `operator/`
-    - override `operator<` `operator<=` `operator>` `operator>=` `operator==` `operator!=`
+     - specialization in the .cpp file
+     - method with templates
+     - methods const
+     - constructor overloading
+     - override `operator+` `operator-` `operator*` `operator/`
+     - override `operator<` `operator<=` `operator>` `operator>=` `operator==` `operator!=`
 
 * `FloatingPointAbstractInterval` Class & IntegerPointAbstractInterval` Class:
-    - sottoclasse di `AbstractInterval`
-    - specializzazione nel file .cpp
-    - metodi const
-    - override `operator+` `operator-` `operator*` `operator/` `operator==`
-    - override dei metodi `isFinite()` `intersects()` `width()` `isContainedIn()`
+     - subclass of `AbstractInterval`
+     - specialization in the .cpp file
+     - methods const
+     - override `operator+` `operator-` `operator*` `operator/` `operator==`
+     - method overrides `isFinite()` `intersects()` `width()` `isContainedIn()`
 
 * `Infinity` Class:
-    - specializzazione nel file .cpp
-    - metodi const
-    - override `operator+` `operator-` `operator*` `operator/`
-    - override `operator<` `operator<=` `operator>` `operator>=` `operator==` `operator!=`
-    - overloading operatori
+     - specialization in the .cpp file
+     - methods const
+     - override `operator+` `operator-` `operator*` `operator/`
+     - override `operator<` `operator<=` `operator>` `operator>=` `operator==` `operator!=`
+     - operator overloading
 
 * `UndefinedOperationException` Class:
-    - sottoclasse di `std::exception`
-    - override metodo `what()`
+     - subclass of `std::exception`
+     - override `what()` method
 
 * `Test` files:
-    - test delle funzionalita' sui metodi delle classi create
+     - test of the functionality on the methods of the classes created
 
-* `Intepreter`:
-    - utilizzo del container map
-    - utilizzo di un iterator per scorrere gli elementi della map
-    - lettura dal file `input.txt`
-    - utilizzo pratico della libreria implementata per l'analisi di un programma
+* `Interpreter`:
+     - use of the container map
+     - use of an iterator to iterate the elements of the map
+     - reading from the `input.txt` file
+     - practical use of the implemented library for the analysis of a program
 
-* Altre note:
-    - codice all'interno di `namespace`
-    - costruttori marcati `explicit`
-    - libreria `catch2` per il testing
-    - metodi marcati `const`
-    - Doxygen per la documentazione
+* Other notes:
+     - code inside `namespace`
+     - constructors marked `explicit`
+     - `catch2` library for testing
+     - methods marked `const`
+     - Doxygen for documentation
